@@ -22,7 +22,7 @@ from wx.lib.masked import TimeCtrl
 import wx.lib.masked as masked
 from decimal import Decimal, ROUND_HALF_UP
 import wx.lib.inspection
-import HandyUtilities as HUD
+import handy_utils as HUD
 
 
 

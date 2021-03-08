@@ -23,7 +23,7 @@ import datetime
 #import psycopg2
 import wx.grid as gridlib
 import wx.lib.masked as masked
-import Printer as PRx
+import printer as PRx
 from decimal import Decimal, ROUND_HALF_UP, ROUND_UP, ROUND_05UP
 import wx,os,sys,time
 import wx.lib.inspection
@@ -34,8 +34,10 @@ from ObjectListView import ObjectListView, ColumnDefn, OLVEvent
 from wx.lib.mixins.listctrl import CheckListCtrlMixin, ListCtrlAutoWidthMixin
 import wx.lib.agw.ultimatelistctrl as ULC
 from operator import itemgetter
+from button_stuff import ButtonOps
+from var_operations import VarOps
 #from wx.lib.masked import TimeCtrl
-from db_related import TableAware, LookupDB, SQConnect
+from db_related import TableAware, LookupDB, SQConnect, QueryOps
 
 
 global debug
@@ -578,7 +580,7 @@ class DictMaker(dict):
 #                 return loc
 
 
-class wx.FindWindowByName(object):
+class CtrlOps(object):
     def __init__(self, name, debug=False):
         self.name = name
         
@@ -1133,96 +1135,93 @@ class LoadSaveList(object):
 
 
 
-class VarOps(object):
-    def __init__(self, debug=False):
-        pass    
+# class VarOps(object):
+#     def __init__(self, debug=False):
+#         pass    
 
-    def DeTupler(self, value):
-        typd = str(type(value))
-        if value:
-            while re.search('(tuple|list)', str(type(value)), re.I):
-                value = value[0]
+#     def DeTupler(self, value):
+#         typd = str(type(value))
+#         if value:
+#             while re.search('(tuple|list)', str(type(value)), re.I):
+#                 value = value[0]
 
-        return value
+#         return value
 
-    def is_json(self, myjson):
-        try:
-            json_object = json.loads(myjson)
-        except (TypeError, ValueError) as e:
-            #print(f'JSON Error : {e}')
-            return False
-        return True
+#     def is_json(self, myjson):
+#         try:
+#             json_object = json.loads(myjson)
+#         except (TypeError, ValueError) as e:
+#             #print(f'JSON Error : {e}')
+#             return False
+#         return True
 
-    def CheckJson(self, vari):
-        b = self.CheckNone(vari)
-        if b is None:
-            return None
-        #print(f'Before CHECKJSON : {vari[0]}')
-        a = self.is_json(vari[0])
-        #print(f'AFTER CHeckJSON : {a}')
-        if a is True:
-            a = json.loads(vari[0])
-        else:
-            a = vari
-        return a
+#     def CheckJson(self, vari):
+#         b = self.CheckNone(vari)
+#         if b is None:
+#             return None
+#         #print(f'Before CHECKJSON : {vari[0]}')
+#         a = self.is_json(vari[0])
+#         #print(f'AFTER CHeckJSON : {a}')
+#         if a is True:
+#             a = json.loads(vari[0])
+#         else:
+#             a = vari
+#         return a
     
-    def DoJson(self, vari):
-        a = vari
-        ta = self.GetTyped(a)
-        if re.search('(list|tuple|dict)', ta, re.I):
-            a = json.dumps(vari)
-        return a
+#     def DoJson(self, vari):
+#         a = vari
+#         ta = self.GetTyped(a)
+#         if re.search('(list|tuple|dict)', ta, re.I):
+#             a = json.dumps(vari)
+#         return a
 
-    def GetTyped(self, item, debug=False):
-        return str(type(item))
+#     def GetTyped(self, item, debug=False):
+#         return str(type(item))
         
-    def StrList(self, listd):
-        a = listd
+#     def StrList(self, listd):
+#         a = listd
         
-        if listd is not None:
-            a = []
-            for i in listd: 
-                a.append(str(i))
+#         if listd is not None:
+#             a = []
+#             for i in listd: 
+#                 a.append(str(i))
         
-        return a
+#         return a
 
-    def CheckNone(self, val, debug=False):
-        a = str(type(val))
-        b = VarOps().DeTupler(val)
-        if b is None:
-            return None
-        obret = val
-        
-        
-        
-        a = str(type(val))
-           
-        if 'tuple' in a:
-            if len(val) == 0:
-                obret = None
-            else:
-                obret = val[0]
+#     def CheckNone(self, val, debug=False):
+#         a = str(type(val))
+#         b = VarOps().DeTupler(val)
+#         if b is None:
+#             return None
+       
+#         obret = val
+#         a = str(type(val))
+#         if 'tuple' in a:
+#             if len(val) == 0:
+#                 obret = None
+#             else:
+#                 obret = val[0]
     
-        if 'None' in a:
-            obret = None
+#         if 'None' in a:
+#             obret = None
 
-        return obret
+#         return obret
 
 
-    def ChangeType(self, instr, typd):
-        rd = str(type(instr))
-        final = instr
-        if not re.search(rd, typd, re.I):
-            if re.match(typd, 'decimal', re.I):
-                final = Decimal(instr)
-            if re.match(typd, 'string', re.I):
-                final = str(instr)
-            if re.match(typd, 'float', re.I):
-                final = float(instr)
-            if re.match(typd, 'integer', re.I):
-                final = int(instr)
+#     def ChangeType(self, instr, typd):
+#         rd = str(type(instr))
+#         final = instr
+#         if not re.search(rd, typd, re.I):
+#             if re.match(typd, 'decimal', re.I):
+#                 final = Decimal(instr)
+#             if re.match(typd, 'string', re.I):
+#                 final = str(instr)
+#             if re.match(typd, 'float', re.I):
+#                 final = float(instr)
+#             if re.match(typd, 'integer', re.I):
+#                 final = int(instr)
             
-        return final
+#         return final
 
 
     #def GetJson(self,jsond):
@@ -1279,61 +1278,61 @@ class ListBox_Ops(object):
         return result
 
 
-    def MaskData(self, query, data, debug=False):
-        if data is not None or data != '' or len(data) != 0:
-            new_data = []
-            fromquery = []
-            if re.search('SELECT', query, re.I):
+    # def MaskData(self, query, data, debug=False):
+    #     if data is not None or data != '' or len(data) != 0:
+    #         new_data = []
+    #         fromquery = []
+    #         if re.search('SELECT', query, re.I):
                 
                 
-                if re.search('LIKE', query, re.I):
+    #             if re.search('LIKE', query, re.I):
                     
                     
-                    if re.search('(or|and)', query, re.I):
+    #                 if re.search('(or|and)', query, re.I):
                         
                         
-                        fromquery = re.split('(or|and)', query, flags=re.IGNORECASE)
-                    else:
-                        fromquery.append(query)
+    #                     fromquery = re.split('(or|and)', query, flags=re.IGNORECASE)
+    #                 else:
+    #                     fromquery.append(query)
                         
-                    idx = 0
-                    for item in fromquery:
-                        dat = ''
+    #                 idx = 0
+    #                 for item in fromquery:
+    #                     dat = ''
                         
-                        if re.search('(\?|%s)', item):
+    #                     if re.search('(\?|%s)', item):
                             
-                            if re.search('LIKE',item, re.I):
-                                if len(data) != 0:
+    #                         if re.search('LIKE',item, re.I):
+    #                             if len(data) != 0:
                                     
-                                    dat = '%{}%'.format(data[idx])
+    #                                 dat = '%{}%'.format(data[idx])
                                 
-                            else:
-                                dat = '{}'.format(data[idx])
+    #                         else:
+    #                             dat = '{}'.format(data[idx])
                             
-                            new_data.append(dat)
+    #                         new_data.append(dat)
         
-                            idx += 1
-                else:
-                    new_data = data
-            else:
-                new_data = data
+    #                         idx += 1
+    #             else:
+    #                 new_data = data
+    #         else:
+    #             new_data = data
             
             
             
-            typd = str(type(new_data))
+    #         typd = str(type(new_data))
             
-            if 'list' in typd:
+    #         if 'list' in typd:
             
-                new_data = tuple(new_data)
+    #             new_data = tuple(new_data)
                 
-            else:
-                pass    
+    #         else:
+    #             pass    
             
-            if len(data) == 0:
-                new_data = ''
+    #         if len(data) == 0:
+    #             new_data = ''
                 
             
-            return new_data
+    #         return new_data
 
 # def CreditCheck(custNum=None, credit=False):
 #     print(('CheckCredit : {} \ {}'.format(custNum, credit)))
@@ -1668,245 +1667,245 @@ class MiscOps(object):
         
 
 
-class QueryOps(object):
-    def __init__(self, debug=False):
-        pass    
+# class QueryOps(object):
+#     def __init__(self, debug=False):
+#         pass    
 
-    def GetQuery(self, fields, tableName, whereField, whereValue):
-        query = '''SELECT {}
-                   FROM {}
-                   WHERE {}=(?)'''.format(fields, tableName, whereField)
-        data = [whereValue]
-        returnd = SQConnect(query, data).ONE()
-        return returnd
+#     def GetQuery(self, fields, tableName, whereField, whereValue):
+#         query = '''SELECT {}
+#                    FROM {}
+#                    WHERE {}=(?)'''.format(fields, tableName, whereField)
+#         data = [whereValue]
+#         returnd = SQConnect(query, data).ONE()
+#         return returnd
 
-    def QueryCheck(self, fromTable, queryWhere=None, queryData=None, debug=False):
-        if queryWhere == '' or queryWhere is None:
+#     def QueryCheck(self, fromTable, queryWhere=None, queryData=None, debug=False):
+#         if queryWhere == '' or queryWhere is None:
             
-            query = 'SELECT count(*) FROM {0}'.format(fromTable)
-            data = ''
+#             query = 'SELECT count(*) FROM {0}'.format(fromTable)
+#             data = ''
             
-        elif not re.search('(=|LIKE)', queryWhere) and queryWhere.count('?') == 0:
-            query = '''SELECT count(*)
-                       FROM {0}
-                       WHERE {1}=(?)'''.format(fromTable, queryWhere)
-            data = queryData
-        else:
+#         elif not re.search('(=|LIKE)', queryWhere) and queryWhere.count('?') == 0:
+#             query = '''SELECT count(*)
+#                        FROM {0}
+#                        WHERE {1}=(?)'''.format(fromTable, queryWhere)
+#             data = queryData
+#         else:
             
-            query = '''SELECT count(*)
-                    FROM {0}
-                    WHERE {1}'''.format(fromTable, queryWhere)
-            data = queryData
+#             query = '''SELECT count(*)
+#                     FROM {0}
+#                     WHERE {1}'''.format(fromTable, queryWhere)
+#             data = queryData
         
-        VarOps().GetTyped(fromTable)
-        returnd = SQConnect(query, data).ONE()
+#         VarOps().GetTyped(fromTable)
+#         returnd = SQConnect(query, data).ONE()
         
-        if re.search('(list|tuple)', str(type(returnd)), re.I):
-            returnd = VarOps().DeTupler(returnd)    
+#         if re.search('(list|tuple)', str(type(returnd)), re.I):
+#             returnd = VarOps().DeTupler(returnd)    
         
-        return returnd
+#         return returnd
 
-    def ANDSearch(self, whatField, items):
+#     def ANDSearch(self, whatField, items):
 
-        cnt = items.count(' ')
-        text = ''
+#         cnt = items.count(' ')
+#         text = ''
 
-        if cnt > 0:
-            sp1 = items.split()
-            if 'list' in str(type(whatField)):
-                xx = 0
-                longList = len(whatField) - 1
-                for field in whatField:
-                    if xx > 0:
-                        text += ' OR '
+#         if cnt > 0:
+#             sp1 = items.split()
+#             if 'list' in str(type(whatField)):
+#                 xx = 0
+#                 longList = len(whatField) - 1
+#                 for field in whatField:
+#                     if xx > 0:
+#                         text += ' OR '
 
-                    for i in range(len(sp1)):
-                        text += "{0} LIKE '%{1}%'".format(field, sp1[i])
-                        if i < len(sp1) - 1:
-                            text += ' AND '
-                    xx += 1
-            else:
-                for i in range(len(sp1)):
-                    text += "{0} LIKE '%{1}%'".format(whatField, sp1[i])
-                    if i < len(sp1) - 1:
-                        text += ' AND '
+#                     for i in range(len(sp1)):
+#                         text += "{0} LIKE '%{1}%'".format(field, sp1[i])
+#                         if i < len(sp1) - 1:
+#                             text += ' AND '
+#                     xx += 1
+#             else:
+#                 for i in range(len(sp1)):
+#                     text += "{0} LIKE '%{1}%'".format(whatField, sp1[i])
+#                     if i < len(sp1) - 1:
+#                         text += ' AND '
 
-        else:
-            if 'list' in str(type(whatField)):
-                xx = 0
-                for field in whatField:
-                    if xx > 0:
-                        text += ' OR '
+#         else:
+#             if 'list' in str(type(whatField)):
+#                 xx = 0
+#                 for field in whatField:
+#                     if xx > 0:
+#                         text += ' OR '
 
-                    text += "{0} LIKE '%{1}%'".format(field, items)
-                    xx += 1
-            else:
-                text = "{0} LIKE '%{1}%'".format(whatField, items)
-        print(("And Search Text : ",text))
-        return text
+#                     text += "{0} LIKE '%{1}%'".format(field, items)
+#                     xx += 1
+#             else:
+#                 text = "{0} LIKE '%{1}%'".format(whatField, items)
+#         print(("And Search Text : ",text))
+#         return text
 
-    def CheckEntryExist(self, controlfield, ItemNumberd, table_list, debug=False):
-        for table in table_list:
-            queryWhere = "{0}".format(controlfield)
-            queryData = (ItemNumberd,)
-            countreturn = QueryOps().QueryCheck(table, queryWhere, queryData)
+#     def CheckEntryExist(self, controlfield, ItemNumberd, table_list, debug=False):
+#         for table in table_list:
+#             queryWhere = "{0}".format(controlfield)
+#             queryData = (ItemNumberd,)
+#             countreturn = QueryOps().QueryCheck(table, queryWhere, queryData)
             
-            added = False
-            if countreturn == 0:
-                added = True
+#             added = False
+#             if countreturn == 0:
+#                 added = True
                 
-                query = "INSERT INTO {0} ({1}) VALUES (?)".format(table,
-                                                                controlfield)
+#                 query = "INSERT INTO {0} ({1}) VALUES (?)".format(table,
+#                                                                 controlfield)
                 
-                data = (ItemNumberd,)
-                SQConnect(query, data).ONE()
-            else:
-                pass      
+#                 data = (ItemNumberd,)
+#                 SQConnect(query, data).ONE()
+#             else:
+#                 pass      
 
-        return added
+#         return added
 
 
 
-    def Commaize(self, list_of_tuples, typd='names'):
-        idx = 0
-        fieldSet = ''
-        dataSet = []
+#     def Commaize(self, list_of_tuples, typd='names'):
+#         idx = 0
+#         fieldSet = ''
+#         dataSet = []
         
-        print(('CommaIze : {} : {}'.format(list_of_tuples, typd)))
-        for name,table,field in list_of_tuples:
-            if typd == 'names':
-                value = wx.FindWindowByName(name).GetCtrl()
-            if typd == 'vari':  
-                value = name
-            if value is None or value == '':
-                value = None #continue
-            if idx > 0:
-                fieldSet += ', '
+#         print(('CommaIze : {} : {}'.format(list_of_tuples, typd)))
+#         for name,table,field in list_of_tuples:
+#             if typd == 'names':
+#                 value = wx.FindWindowByName(name).GetCtrl()
+#             if typd == 'vari':  
+#                 value = name
+#             if value is None or value == '':
+#                 value = None #continue
+#             if idx > 0:
+#                 fieldSet += ', '
                 
-            fieldSet += '{}=(?)'.format(field)
-            dataSet.append(value)
+#             fieldSet += '{}=(?)'.format(field)
+#             dataSet.append(value)
                 
-            idx += 1
-            table = table
+#             idx += 1
+#             table = table
                 
-        # pout.v('Field Set : ',fieldSet)
-        # pout.v('data Set : ',dataSet)
-        # pout.v('table : ',table)
-        return fieldSet, dataSet, table
+#         # pout.v('Field Set : ',fieldSet)
+#         # pout.v('data Set : ',dataSet)
+#         # pout.v('table : ',table)
+#         return fieldSet, dataSet, table
 
-    def CreditCheck(self, custNum=None, credit=False):
-        print(('CheckCredit : {} \ {}'.format(custNum, credit)))
-        if custNum is not None:
-            query = 'SELECT freeze_charges FROM customer_accts_receivable WHERE cust_num=(?)'
-            data = [custNum,]
-            returnd = SQConnect(query,data).ONE()
+#     def CreditCheck(self, custNum=None, credit=False):
+#         print(('CheckCredit : {} \ {}'.format(custNum, credit)))
+#         if custNum is not None:
+#             query = 'SELECT freeze_charges FROM customer_accts_receivable WHERE cust_num=(?)'
+#             data = [custNum,]
+#             returnd = SQConnect(query,data).ONE()
         
-            #print(('check Credit returnd : ',returnd))
+#             #print(('check Credit returnd : ',returnd))
         
-            if returnd[0] == 1:
-                credit = True
+#             if returnd[0] == 1:
+#                 credit = True
         
-        return credit
+#         return credit
 
-    def CustPenaltyCheck(self, custNum):
-        query = 'SELECT last_avail_credit FROM customer_penalty_info WHERE cust_num=(?)'
-        data = [custNum,]
-        returnd = SQConnect(query, data).ONE()
-        limit = 0
-        if returnd is not None and returnd > 0:
-            limit = returnd[0]
+#     def CustPenaltyCheck(self, custNum):
+#         query = 'SELECT last_avail_credit FROM customer_penalty_info WHERE cust_num=(?)'
+#         data = [custNum,]
+#         returnd = SQConnect(query, data).ONE()
+#         limit = 0
+#         if returnd is not None and returnd > 0:
+#             limit = returnd[0]
             
         
-        return limit
+#         return limit
             
-    def CheckCredit(self, custNum):
-        query = 'SELECT credit_limit FROM customer_accts_receivable WHERE cust_num=(?)'
-        data = [custNum,]
-        returnd = SQConnect(query,data).ONE()
-        climit = 0
-        if returnd[0] is not None and returnd[0] > 0:
-            climit = returnd[0]
+#     def CheckCredit(self, custNum):
+#         query = 'SELECT credit_limit FROM customer_accts_receivable WHERE cust_num=(?)'
+#         data = [custNum,]
+#         returnd = SQConnect(query,data).ONE()
+#         climit = 0
+#         if returnd[0] is not None and returnd[0] > 0:
+#             climit = returnd[0]
         
-        penalty_limit = CustPenaltyCheck(custNum)
+#         penalty_limit = CustPenaltyCheck(custNum)
         
-        if penalty_limit is not None and penalty_limit > 0:
-            climit = penalty_limit
+#         if penalty_limit is not None and penalty_limit > 0:
+#             climit = penalty_limit
         
-        return climit    
+#         return climit    
 
 
-    def DisplayLookupItemsinGrid(self, queryWhere, queryData, queryTable, debug=False):
-            fields = 'upc,description,retails,quantity_on_hand'
+#     def DisplayLookupItemsinGrid(self, queryWhere, queryData, queryTable, debug=False):
+#             fields = 'upc,description,retails,quantity_on_hand'
             
-            if not 'item_detailed' in queryTable:
+#             if not 'item_detailed' in queryTable:
                 
-                returnd = []
-                query = '''SELECT upc
-                        FROM {0}
-                        WHERE {1}'''.format(queryTable, queryWhere)
+#                 returnd = []
+#                 query = '''SELECT upc
+#                         FROM {0}
+#                         WHERE {1}'''.format(queryTable, queryWhere)
 
-                data = queryData
-                returnd1 = SQConnect(query, data).ALL()
+#                 data = queryData
+#                 returnd1 = SQConnect(query, data).ALL()
                 
-                for upcd in returnd1:
-                    query = '''SELECT {0}
-                            FROM {1}
-                            WHERE upc=(?)'''.format(fields, 'item_detailed')
-                    data = (upcd,)
-                    returnd2 = SQConnect(query, data).ALL()
+#                 for upcd in returnd1:
+#                     query = '''SELECT {0}
+#                             FROM {1}
+#                             WHERE upc=(?)'''.format(fields, 'item_detailed')
+#                     data = (upcd,)
+#                     returnd2 = SQConnect(query, data).ALL()
 
-                    returnd.append(returnd2)
+#                     returnd.append(returnd2)
                     
-            else:
-                query = '''SELECT {0}
-                        FROM {1}
-                        WHERE {2}'''.format(fields, queryTable, queryWhere)
-                data = queryData
-                returnd = SQConnect(query, data).ALL()
+#             else:
+#                 query = '''SELECT {0}
+#                         FROM {1}
+#                         WHERE {2}'''.format(fields, queryTable, queryWhere)
+#                 data = queryData
+#                 returnd = SQConnect(query, data).ALL()
 
-            if len(returnd) > 0:
-                grid = wx.FindWindowByName('itemLookup_display_grid')
-                ClearCtrl(grid.GetName())
-                AlterGrid(grid.GetName(), returnd)
+#             if len(returnd) > 0:
+#                 grid = wx.FindWindowByName('itemLookup_display_grid')
+#                 ClearCtrl(grid.GetName())
+#                 AlterGrid(grid.GetName(), returnd)
 
                 
-                xx = 0
+#                 xx = 0
                 
-                for upc, description, retails, qoh in returnd:
-                    for yy in range(grid.GetNumberCols()):
-                        header = grid.GetColLabelValue(yy)
+#                 for upc, description, retails, qoh in returnd:
+#                     for yy in range(grid.GetNumberCols()):
+#                         header = grid.GetColLabelValue(yy)
                         
-                        if 'Item Number' in header:
-                            grid.SetCellValue(xx, yy, str(upc))
-                        if 'Item Description' in header:
-                            grid.SetCellValue(xx, yy, str(description))
-                        if 'Price' in header:
-                            try:
-                                retail_now = retails
-                                retailPrice = retail_now['standard_price']['price']
+#                         if 'Item Number' in header:
+#                             grid.SetCellValue(xx, yy, str(upc))
+#                         if 'Item Description' in header:
+#                             grid.SetCellValue(xx, yy, str(description))
+#                         if 'Price' in header:
+#                             try:
+#                                 retail_now = retails
+#                                 retailPrice = retail_now['standard_price']['price']
                              
-                                moneyd = RoundIt(retailPrice, '1.00')
+#                                 moneyd = RoundIt(retailPrice, '1.00')
                                 
-                                grid.SetCellValue(xx, yy, str(moneyd))
-                            except:
-                                grid.SetCellValue(xx, yy, '')
-                        if 'OnHand' in header:
-                            grid.SetCellValue(xx, yy, str(qoh))
+#                                 grid.SetCellValue(xx, yy, str(moneyd))
+#                             except:
+#                                 grid.SetCellValue(xx, yy, '')
+#                         if 'OnHand' in header:
+#                             grid.SetCellValue(xx, yy, str(qoh))
 
-                    xx += 1
+#                     xx += 1
 
-                GridOps(grid.GetName()).GridAlternateColor(len(returnd))
-                grid.Refresh()
+#                 GridOps(grid.GetName()).GridAlternateColor(len(returnd))
+#                 grid.Refresh()
 
 
-    def GetItemLine(self, gridname,row):
-        getList = ['Item Number','Description','Price','Quantity','Total','Disc','Tx']
-        got = []
-        for item in getList:
-            x = GridOps(gridname).GetCell(item, row)
-            got.append(x)
+#     def GetItemLine(self, gridname,row):
+#         getList = ['Item Number','Description','Price','Quantity','Total','Disc','Tx']
+#         got = []
+#         for item in getList:
+#             x = GridOps(gridname).GetCell(item, row)
+#             got.append(x)
         
-        return got
+#         return got
 
 # def RetailSifting(upc):
 #     sift_list = [(0, 'item_retails', 'standard_unit', 'standard_price'),
@@ -1981,11 +1980,8 @@ def numToWords(num,join=True):
             if (g>=1) and ((h+t+u)>0): words.append(thousands[g]+',')
     if join: return ' '.join(words)
     return words        
-        
-        
-        
-        
-        
+
+
 def ReturnItems(return_dict):
     cnt = len(return_dict)
     for key, tup in list(return_dict.items()):
@@ -1999,11 +1995,6 @@ def ReturnItems(return_dict):
                    LIMIT 1'''
         data = [Decimal(qty), transNum, itemNum,]
         returnd = SQConnect(query, data).ONE()
-            
-        
-        
-        
-        
         
         
 def ReadyClose(CloseDict): #ATs,payment=None,transType=None,stationNum=None,drawer=None,addrNum=None,custNum=None,ponumber=None,transNum=None,returns=None, debug=False):
@@ -6112,7 +6103,7 @@ class AddressAccounts(wx.Dialog):
         for name,field in clear_list:
             wx.FindWindowByName(name).ClearCtrl()
             
-        for i in ['SaveButton','DeleteButton','UndoButton']):
+        for i in ['SaveButton','DeleteButton','UndoButton']:
             wx.FindWindowByName(i).EnableCtrl()
 
         new_acctNum = AccountOps().AcctNumAuto('address_accounts','addr_acct_num')

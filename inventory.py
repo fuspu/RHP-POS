@@ -9,6 +9,7 @@ import wx.grid as gridlib
 import sys,re
 import faulthandler
 import json
+import time
 import numpy
 import xml.etree.cElementTree as ET
 import wx.lib.masked as masked
@@ -17,8 +18,8 @@ import pout
 import handy_utils as HUD
 from button_stuff import ButtonOps
 from decimal import Decimal, ROUND_HALF_UP
-import time
 from db_related import SQConnect, LookupDB
+from var_operations import VarOps, LoadSaveList
 
 global debug
 debug = False
@@ -436,7 +437,7 @@ class page_item_detail(wx.Panel):
         # query = "SELECT name,scheme_list,reduce_by from item_pricing_schemes"
         # returnd = HUD.SQConnect(query, '').ALL()
         returnd = LookupDB('item_pricing_schemes').General('name, scheme_list, reduce_by')
-        
+        pout.v(returnd)
         priceschema_list = returnd
 
         box = wx.StaticBox(self, label="Pricing\nSchemes")
@@ -449,9 +450,11 @@ class page_item_detail(wx.Panel):
         
         rb.Bind(wx.EVT_BUTTON, self.OnPriceSchemes)
         boxSizer.Add(rb, 0)
-
-        for label, scheme_list, reduce_by in priceschema_list:
-            rb = wx.Button(self, id=wx.ID_ANY, 
+        print(f'Returnd : {returnd}')
+        for i in returnd:
+            print(i)
+        for label, scheme_list, reduce_by in returnd:
+            rb = HUD.RH_Button(self, id=wx.ID_ANY, 
                            label=label, 
                            name=scheme_list)
             
@@ -1295,7 +1298,7 @@ class vendorTab(wx.Panel):
         #     # data = [upc,]
         #     # returnd = HUD.SQConnect(query, data).ONE()
         #     #returnd = LookupDB(table).Specific(upc, 'upc', field)
-        #     #ret = HUD.VarOps().DeTupler(returnd)
+        #     #ret = VarOps().DeTupler(returnd)
         #     #wx.FindWindowByName(name).SetCtrl(ret)
         #     pout.v(f"Name : {name} ; Table : {table} ; Field : {field} ; UPC : {upc}")
         #     item = wx.Window.FindWindowByName(name)
@@ -1434,7 +1437,7 @@ class page_notes(wx.Panel):
         # data = [self.ItemNumberd,]
         # returnd = HUD.SQConnect(query, data).ONE()
         returnd = LookupDB('item_notes').Specific(self.ItemNumberd, 'upc', 'notes')
-        ret = HUD.VarOps().DeTupler(returnd)
+        ret = VarOps().DeTupler(returnd)
         self.ctrl.SetValue(ret) #CO('notes_notes_txtctrl').SetCtrl(ret)
         
     
@@ -1524,7 +1527,7 @@ class custInstructionTab(wx.Panel):
             
             for field, name, table in clist:
                 returnd = LookupDB('table').Specific(self.ItemNumberd,'upc',field)
-                ret = HUD.VarOps().DeTupler(returnd)
+                ret = VarOps().DeTupler(returnd)
                 
                 wx.FindWindowByName(name).SetCtrl(ret)
                 
@@ -1694,7 +1697,7 @@ class page_daily_movement(wx.Panel):
         
         
         
-        HUD.VarOps().GetTyped(returnd)
+        VarOps().GetTyped(returnd)
         HUD.GridOps(gridname).AlterGrid(returnd)
         if returnd is not None:
             idx = 0
@@ -1704,11 +1707,11 @@ class page_daily_movement(wx.Panel):
                     continue
                 
                 
-                HUD.VarOps().GetTyped(begin_date)
+                VarOps().GetTyped(begin_date)
                 
-                HUD.VarOps().GetTyped(dated)
+                VarOps().GetTyped(dated)
                 
-                HUD.VarOps().GetTyped(end_date)
+                VarOps().GetTyped(end_date)
                 
                 gross_profit = Decimal(qty)*(Decimal(price) - Decimal(avgcost))
                 begin = datetime.datetime.strptime(begin_date, '%Y-%m-%d').date()
@@ -1806,42 +1809,59 @@ class StartPanel(wx.Panel):
         
         lookupSizer.Add(iconbar, 0, wx.EXPAND)
         level1Sizer = wx.BoxSizer(wx.HORIZONTAL)
-        lvl1_list = [('Item Number','inventory_itemNumber_txtctrl',250,'item_detailed','upc'),
-                     ('General Item Description without part number',
-                        'inventory_itemDescription_txtctrl',350,'item_detailed','description')]
         
-        for label, name, sized, table, field in lvl1_list:
-            box = wx.StaticBox(self, label=label)
-            boxSizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
-            if 'itemNumber' in name:
-                ctrl = HUD.RH_TextCtrl(self, -1, 
-                                   size=(sized, 21), 
-                                   name=name, 
-                                   style=wx.TE_PROCESS_ENTER|wx.TE_PROCESS_TAB)
-                
-                ctrl.SetFocus()
-                ctrl.SelectAll()
-                ctrl.Bind(wx.EVT_KEY_DOWN, self.onCatchKey)
+        name = 'inventory_itemNumber_txtctrl'
+        ctrl = HUD.RH_TextCtrl(self, -1, size=(250,-1), name=name, style=wx.TE_PROCESS_ENTER|wx.TE_PROCESS_TAB)
+        ctrl.SetFocus()
+        ctrl.SelectAll()
+        ctrl.SetHint('Item Number')
+        ctrl.SetToolTip(wx.ToolTip('Enter Item Number Here & press Enter'))
+        ctrl.Bind(wx.EVT_KEY_DOWN, self.onCatchKey)
+        ctrl.fieldName = 'upc'
+        ctrl.tableName = 'item_detailed'
+        level1Sizer.Add(ctrl, 0, wx.ALL, 3)
 
-            if 'itemDescription' in name:
-                ctrl = HUD.RH_TextCtrl(self, -1, 
-                                   size=(sized, 21), 
-                                   name=name, 
-                                   style=wx.TE_PROCESS_TAB)
+        name = 'inventory_itemDescription_txtctrl'
+        ctrl = HUD.RH_TextCtrl(self, -1, size=(350,-1), name=name, style=wx.TE_PROCESS_TAB)
+        ctrl.SetHint('Item Description')
+        ctrl.SetToolTip(wx.ToolTip('Enter Item Description Here'))
+        ctrl.Bind(wx.EVT_KILL_FOCUS, HUD.EventOps().CheckMeasurements)
+        ctrl.fieldName = 'description'
+        ctrl.tableName = 'item_detailed'
+        level1Sizer.Add(ctrl, 0, wx.ALL, 3)
+
+        # for label, name, sized, table, field in lvl1_list:
+        #     box = wx.StaticBox(self, label=label)
+        #     boxSizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
+        #     if 'itemNumber' in name:
+        #         ctrl = HUD.RH_TextCtrl(self, -1, 
+        #                            size=(sized, 21), 
+        #                            name=name, 
+        #                            style=wx.TE_PROCESS_ENTER|wx.TE_PROCESS_TAB)
                 
-                ctrl.Bind(wx.EVT_KILL_FOCUS, HUD.EventOps().CheckMeasurements)
-            ctrl.fieldName = field
-            ctrl.tableName = table
-            boxSizer.Add(ctrl, 0, wx.EXPAND|wx.ALL,3)
-            level1Sizer.Add(boxSizer, 0, wx.ALL,3)
+        #         ctrl.SetFocus()
+        #         ctrl.SelectAll()
+        #         ctrl.Bind(wx.EVT_KEY_DOWN, self.onCatchKey)
+
+        #     if 'itemDescription' in name:
+        #         ctrl = HUD.RH_TextCtrl(self, -1, 
+        #                            size=(sized, 21), 
+        #                            name=name, 
+        #                            style=wx.TE_PROCESS_TAB)
+                
+        #         ctrl.Bind(wx.EVT_KILL_FOCUS, HUD.EventOps().CheckMeasurements)
+        #     ctrl.fieldName = field
+        #     ctrl.tableName = table
+        #     boxSizer.Add(ctrl, 0, wx.EXPAND|wx.ALL,3)
+        #     level1Sizer.Add(boxSizer, 0, wx.ALL,3)
         
         countreturn = HUD.QueryOps().QueryCheck('item_detailed')
-
+        pout.v(countreturn)
         if countreturn > 0:
-            returnd = LookupDB('item_detailed').General('upc',limit=1)[0]
-            
+            returnd = LookupDB('item_detailed').General('upc',limit=1)
+            pout.v(str(type(returnd)),returnd)
             itemNumber = wx.FindWindowByName('inventory_itemNumber_txtctrl')
-            itemNumber.SetValue(returnd[0])
+            itemNumber.SetCtrl(returnd)
 
             wx.CallAfter(self.OnItemNumber, event=None, upc=itemNumber.GetValue().strip())
 
@@ -1983,7 +2003,7 @@ class StartPanel(wx.Panel):
         custInst_list = ['Info','ReturnPolicy','Warranty']
         for item in custInst_list:
             tab = wx.FindWindowByName('CustInstruct_{}_Tab'.format(item))
-            if HUD.VarOps().CheckNone(tab) is not None:
+            if VarOps().CheckNone(tab) is not None:
                 tab.Clear()
         
    #---- Flash Add Dialog
@@ -2232,7 +2252,7 @@ class StartPanel(wx.Panel):
             ItemLookupD.Destroy()
     
         else:
-            itempick = HUD.VarOps().DeTupler(returnd)
+            itempick = VarOps().DeTupler(returnd)
     
             
             typed = type(itempick)
@@ -2405,7 +2425,7 @@ class StartPanel(wx.Panel):
 
             returnd = HUD.SQConnect(query, data).ONE()
             
-            ret = HUD.VarOps().CheckNone(returnd)
+            ret = VarOps().CheckNone(returnd)
             wx.FindWindowByName(name).SetCtrl(ret)
         
 #----------- Cost Grid Load
