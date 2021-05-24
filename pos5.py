@@ -957,7 +957,8 @@ class DefaultButtonPanel(wx.Panel):
             
             query = 'SELECT po_number FROM transactions WHERE transaction_id = ?'
             data = (event,)
-            returnd = SQConnect(query, data).ONE()
+            sql_file = 'Transactions.db'
+            returnd = SQConnect(query, data, sql_file).ONE()
             wx.FindWindowByName('pos_PoTab_ponumber_txtctrl').SetCtrl( returnd[0])
             
             wx.CallAfter(trans_btn_tab.ReloadTransaction, event=event)
@@ -1217,7 +1218,8 @@ class TransactionButtonPanel(wx.Panel):
         self.transNum = event
         query = 'SELECT address_acct_num, cust_num FROM transactions WHERE transaction_id=?'
         data = (self.transNum,)
-        returnd = SQConnect(query, data).ONE()
+        sql_file = 'Transactions.db'
+        returnd = SQConnect(query, data, sql_file).ONE()
         
         (addrAcctNum, custNum) = returnd
         
@@ -1582,7 +1584,8 @@ class TransactionButtonPanel(wx.Panel):
             if delrec == wx.YES:
                 query = 'UPDATE transactions set type_of_transaction="VOID" WHERE transaction_id = ?'
                 data = (transNum,)
-                SQConnect(query,data).ONE()
+                sql_file = 'Transactions.db'
+                SQConnect(query, data, sql_file).ONE()
         
         
         wx.CallAfter(self.OnCloseTransaction, event='')            

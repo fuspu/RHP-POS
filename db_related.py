@@ -2,15 +2,16 @@ import pout
 import re
 import json
 import pymysql
+import fdb
 import time
 from var_operations import VarOps
 
-
 class SQConnect(object):
-    def __init__(self, query, data=None, sql_file=None, debug=False):
-        
+    def __init__(self, query, data=None, sql_file=None, dbtype='fdb', debug=False):
+        self.dbtype = dbtype
         self.query = None
         self.data = None
+        self.sql_file = sql_file
         self.debug = debug
         checkTypes = []
         if query is not None:
@@ -24,7 +25,10 @@ class SQConnect(object):
         returnd = None
     
     def ALL(self):
-        con = pymysql.connect(host='localhost', user='rhp', passwd='password', db='rhp')
+        if self.dbtype == 'mysql':
+            con = pymysql.connect(host='localhost', user='rhp', passwd='password', db='rhp')
+        if self.dbtype == 'fdb':
+            con = fdb.connect(host='localhost', database=f'../db/{self.sql_file}', user='rhp', password='password')
         try:
             with con.cursor() as cur:
                 if len(self.data) > 0:
@@ -41,7 +45,11 @@ class SQConnect(object):
         return self.CheckJson(returnd)
 
     def ONE(self):
-        con = pymysql.connect(host='localhost', user='rhp', passwd='password', db='rhp')
+        if self.dbtype == 'mysql':
+            con = pymysql.connect(host='localhost', user='rhp', passwd='password', db='rhp')
+        if self.dbtype == 'fdb':
+            con = fdb.connect(host='localhost', database=f'../db/{self.sql_file}', user='rhp', password='password')
+        
         try: 
             with con.cursor() as cur:
                 #cur = con #. cursor()
@@ -173,9 +181,9 @@ class SQConnect(object):
     
 
 class LookupDB(object):
-    def __init__(self, table, debug=False):
+    def __init__(self, table, sql_file, debug=False):
         self.table = table
-        
+        self.sql_file = sql_file
     def General(self, selectFields, limit=None):
         """Lookup in the database for a non-specific search.
 
@@ -190,7 +198,7 @@ class LookupDB(object):
                    {}'''.format(selectFields, self.table, limitd)
         
         data = ''
-        returnd = SQConnect(query, data).ALL()
+        returnd = SQConnect(query, data, self.sql_file).ALL()
         return returnd
         
     def Specific(self, whereValue, whereField, selectFields, limit=None):
