@@ -7,7 +7,37 @@ import fdb
 import time
 from var_operations import VarOps
 
+class DBConnect(object):
+    def __init__(self, query, data=None, sql_file=None):
+        self.query = query
+        self.data = data
+        self.sql_file = sql_file
+        self.START()
+        
+    def START(self):
+        con = sqlite3.connect(self.sql_file)        
+        cur = con.cursor()
+        if len(self.data) > 0:
+            cur.execute(self.query, self.data)
+        else:
+            cur.execute(self.query)
+    
+    def END(self):
+        if re.search('(UPDATE|INSERT)', self.query, re.I):
+            con.commit()
+    
+        con.close()
 
+    def ALL(self):
+        return cur.fetchall()
+        self.END()
+    
+    def ONE(self):
+        return cur.fetchone()
+        self.END()
+
+
+        
 class SQConnect(object):
     def __init__(self, query, data=None, sql_file=None, dbtype='sqlite3', debug=False):
         self.dbtype = dbtype
@@ -30,7 +60,7 @@ class SQConnect(object):
         if self.dbtype == 'mysql':
             con = pymysql.connect(host='localhost', user='rhp', passwd='password', db='rhp')
         if self.dbtype == 'fdb':
-            con = fdb.connect(host='localhost', database=f'../db/{self.sql_file}', user='rhp', password='password')
+            con = fdb.connect(host='localhost', database=f'{self.sql_file}', user='rhp', password='password')
         if self.dbtype == 'sqlite3':
             con = sqlite3.connect(self.sql_file)
         
@@ -52,7 +82,7 @@ class SQConnect(object):
         if self.dbtype == 'mysql':
             con = pymysql.connect(host='localhost', user='rhp', passwd='password', db='rhp')
         if self.dbtype == 'fdb':
-            con = fdb.connect(host='localhost', database=f'../db/{self.sql_file}', user='rhp', password='password')
+            con = fdb.connect(host='localhost', database=f'{self.sql_file}', user='rhp', password='password')
         if self.dbtype == 'sqlite3':
             con = sqlite3.connect(self.sql_file)
         
@@ -65,6 +95,7 @@ class SQConnect(object):
         returnd = cur.fetchone()
         if re.search('(UPDATE|INSERT)', self.query, re.I):
             con.commit()
+        
         con.close()
 
         return self.CheckJson(returnd)
@@ -198,8 +229,9 @@ class SQConnect(object):
     
 
 class LookupDB(object):
-    def __init__(self, table, sql_file, debug=False):
+    def __init__(self, table, sql_file, dbtype='sqlite3', debug=False):
         self.table = table
+        self.dbtype = dbtype
         self.sql_file = sql_file
     
     def General(self, selectFields, limit=None):
@@ -216,7 +248,7 @@ class LookupDB(object):
                    {}'''.format(selectFields, self.table, limitd)
         
         data = ''
-        returnd = SQConnect(query, data, self.sql_file).ALL()
+        returnd = DBConnect(query, data, self.sql_file).ALL()
         return returnd
         
     def Specific(self, whereValue, whereField, selectFields, limit=None):
@@ -227,7 +259,7 @@ class LookupDB(object):
                    {}'''.format(selectFields, self.table, whereField, limitd)
         
         data = [whereValue,]
-        returnd = SQConnect(query, data, sql_file=self.sql_file).ALL()
+        returnd = DBConnect(query, data, sql_file=self.sql_file).ALL()
         
         pout.v('Specific : {} ; Query : {} ; Data : {}'.format(returnd, query, data))
         #ty = self.Typed(returnd)
@@ -257,7 +289,7 @@ class LookupDB(object):
         if not whereValue:
             data = []
         pout.v(f'Where : {query}\n Data : {data}')
-        returnd = SQConnect(query, data, sql_file=self.sql_file).ONE()
+        returnd = DBConnect(query, data, sql_file=self.sql_file).ONE()
         # if len(returnd) == 0:
         #     returnd = (None,)
 
@@ -283,7 +315,7 @@ class LookupDB(object):
                    SET {}={}
                    WHERE {}=(?)'''.format(self.table, setField, setValue, whereField)
         data = [whereValue,]
-        returnd = SQConnect(query, data, sql_file=self.sql_file).ALL()
+        returnd = DBConnect(query, data, sql_file=self.sql_file).ALL()
         # print(f"Update Single Returnd : {returnd}")
         # print('Type of Returnd : {}'.format(str(type(returnd))))
         a = str(type(returnd))
@@ -296,18 +328,21 @@ class LookupDB(object):
                    SET {}
                    WHERE {}=(?)'''.format(self.table, setWhatNto, WhereField)
         data = WhereValue
-        returnd = SQConnect(query, data, sql_file=self.sql_file).ALL()
+        returnd = DBConnect(query, data, sql_file=self.sql_file).ALL()
         
         return returnd[0]
 
     def DescribeTable(self):
-        # try:
-        query = '''SELECT * FROM information_schema.COLUMNS 
-                   WHERE TABLE_SCHEMA = 'rhp' 
-                   AND TABLE_NAME = "{}"
-                   AND COLUMN_NAME = "{}"'''.format(self.table)
+        if self.dbtype == 'mysql':
+            query = '''SELECT * FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = 'rhp' 
+                    AND TABLE_NAME = "{}"
+                    AND COLUMN_NAME = "{}"'''.format(self.table)
+        if self.dbtype == 'sqlite3':
+            query = '.schema {}'.format(self.table)
+
         data = []
-        returnd = SQConnect(query, data, sql_file=self.sql_file).ALL()
+        returnd = DBConnect(query, data, sql_file=self.sql_file).ALL()
         pout.b(f'DescribeTable : {query} \nReturnd : {returnd}')
         info = {}
         tb = len(returnd)
@@ -329,12 +364,18 @@ class LookupDB(object):
         return returnd
 
     def is_table(self):
-        query = '''SELECT * FROM information_schema.COLUMNS 
-                   WHERE TABLE_SCHEMA = 'rhp' 
-                   AND TABLE_NAME = "{}"
-                '''.format(self.table)
+        pout.v(self.dbtype)
+        if self.dbtype == 'mysql':
+            query = '''SELECT * FROM information_schema.COLUMNS 
+                    WHERE TABLE_SCHEMA = 'rhp' 
+                    AND TABLE_NAME = "{}"
+                    '''.format(self.table)
+        
+        if self.dbtype == 'sqlite3':
+            query = '.schema {}'.format(self.table)
+
         data = []
-        returnd = SQConnect(query, data, sql_file=self.sql_file).ALL()
+        returnd = DBConnect(query, data, sql_file=self.sql_file).ALL()
         
         return returnd
     
@@ -347,7 +388,7 @@ class LookupDB(object):
         AND TABLE_NAME = '{}' 
         AND COLUMN_NAME = '{}'; '''.format(self.table, fieldname)
         data = []
-        returnd = SQConnect(query, data, sql_file=self.sql_file).ONE()
+        returnd = DBConnect(query, data, sql_file=self.sql_file).ONE()
         pout.v(query)
         return returnd
 
@@ -406,7 +447,7 @@ class TableAware(object):
         query = 'CREATE TABLE {} ({} {})'.format(self.table_name, fieldname, defn) 
         print(f' ** Create Table : query : {query}')
         data = []
-        returnd = SQConnect(query, data, sql_file=self.sql_file).ONE()
+        returnd = DBConnect(query, data, sql_file=self.sql_file).ONE()
         self.AddSupport()
     
     def CheckDBType(self):
@@ -438,7 +479,7 @@ class TableAware(object):
         support_sql = '../db/SUPPORT.sql'
         query = f'INSERT INTO {self.table_name} (sql_name, table_name) VALUES (?, ?)'
         data = (self.sql_file, self.table_name)
-        returnd = SQConnect(query, data, support_sql).ONE()
+        returnd = DBConnect(query, data, support_sql).ONE()
 
     def AddField(self, fieldname, char=None, varchar=None, integer=None, text=None, date=None, bool=None, time=None, decimal=None, primary_key=False, defaults=None):
         addTable = self.CheckTable()
@@ -458,7 +499,7 @@ class TableAware(object):
             query = 'ALTER TABLE {} ADD COLUMN {} {}'.format(self.table_name, fieldname, col_defn)
             print(f'++ ALTER TABLE : ADD COLUMN : {query}')
             data = []
-            returnd = SQConnect(query, data).ONE()
+            returnd = DBConnect(query, data).ONE()
 
     def DropField(self, fieldname):
         addTable = self.CheckTable()
@@ -468,12 +509,12 @@ class TableAware(object):
             query = 'ALTER TABLE {} DROP {}'.format(self.table_name, fieldname)
             print(f'-- ALTER TABLE : DROP COLUMN : {query}')
             data = []
-            returnd = SQConnect(query, data).ONE()
+            returnd = DBConnect(query, data).ONE()
 
     def CheckEntries(self):
         query = 'SELECT COUNT(*) FROM {}'.format(self.table_name)
         data = ''
-        return SQConnect(query, data).ONE()
+        return DBConnect(query, data).ONE()
         
     def CreateTestItem(self, fieldnames, values, extra=None):
         returnd = self.CheckEntries()
@@ -488,7 +529,7 @@ class TableAware(object):
                 query = f"INSERT INTO {self.table_name} ({fieldnames}) VALUES ({values});"
                 print(f'$$ -- Create Test Item : query : {query}')
                 data = ''
-                SQConnect(query,data).ONE()    
+                DBConnect(query,data).ONE()    
         
 
 class QueryOps(object):
