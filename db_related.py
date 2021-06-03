@@ -7,6 +7,8 @@ import fdb
 import time
 from var_operations import VarOps
 
+
+    
 class DBConnect(object):
     def __init__(self, query, data=None, sql_file=None):
         self.query = query
@@ -16,11 +18,11 @@ class DBConnect(object):
         
     def START(self):
         con = sqlite3.connect(self.sql_file)        
-        cur = con.cursor()
+        self.cur = con.cursor()
         if len(self.data) > 0:
-            cur.execute(self.query, self.data)
+            self.cur.execute(self.query, self.data)
         else:
-            cur.execute(self.query)
+            self.cur.execute(self.query)
     
     def END(self):
         if re.search('(UPDATE|INSERT)', self.query, re.I):
@@ -29,11 +31,11 @@ class DBConnect(object):
         con.close()
 
     def ALL(self):
-        return cur.fetchall()
+        return self.cur.fetchall()
         self.END()
     
     def ONE(self):
-        return cur.fetchone()
+        return self.cur.fetchone()
         self.END()
 
 
@@ -391,6 +393,32 @@ class LookupDB(object):
         returnd = DBConnect(query, data, sql_file=self.sql_file).ONE()
         pout.v(query)
         return returnd
+
+class Tabling(object):
+    def __init__(self, table_name, col_list, sql_file=None):
+        self.table_name = table_name
+        self.sql_file = sql_file
+        self.col_list = col_list
+
+    def CreateTable(self):
+        query = f'CREATE TABLE IF NOT EXISTS {self.table_name} ({self.col_list});'
+        data = []
+        pout.v(query, data)
+        returnd = DBConnect(query, data, self.sql_file)
+        self.AddSupport()
+
+    def InsertTestData(self, cols_list, data_list):
+        query = f'INSERT INTO {self.table_name}({cols_list}) VALUES (?);'
+        data = (data_list,)
+        pout.v(query, data)
+        returnd = DBConnect(query, data, self.sql_file)
+
+    def AddSupport(self):
+        support_sql = '../db/SUPPORT.sql'
+        suptable = 'tableSupport'
+        query = f'INSERT INTO {suptable} (sql_file, table_name) VALUES (?, ?)'
+        data = (self.sql_file, self.table_name)
+        returnd = DBConnect(query, data, support_sql).ONE()
 
 
 class TableAware(object):
