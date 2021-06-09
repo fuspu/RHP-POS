@@ -580,412 +580,412 @@ class DictMaker(dict):
 #                 return loc
 
 
-class CtrlOps(object):
-    def __init__(self, name, debug=False):
-        self.name = name
+# class CtrlOps(object):
+#     def __init__(self, name, debug=False):
+#         self.name = name
         
 
-    def ClearCtrl(self, fillwith=None):
-        name = self.name
-        if re.search('(unicode|str)', str(type(self.name)), re.I):
-            ctrl = []
-            ctrl.append(self.name)
-            name = ctrl
-        for ctrl in name:    
-            item = wx.FindWindowByName(ctrl)
+#     def ClearCtrl(self, fillwith=None):
+#         name = self.name
+#         if re.search('(unicode|str)', str(type(self.name)), re.I):
+#             ctrl = []
+#             ctrl.append(self.name)
+#             name = ctrl
+#         for ctrl in name:    
+#             item = wx.FindWindowByName(ctrl)
             
-            typd = str(type(item))
+#             typd = str(type(item))
             
             
-            if re.search('textctrl', typd, re.I):
-                item.SetValue('')
-            if re.search('radiobox', typd, re.I):
-                item.SetSelection(0)
-            if re.search('radiobutton', typd, re.I):
-                item.SetValue(0)
-            if re.search('combobox', typd, re.I):
-                #item.Clear()
-                #blank_list = ['']
-                #item.SetItems(blank_list)
-                item.SetSelection(0)
-            if re.search('listbox', typd, re.I):
-                item.Clear()
-            if re.search('listctrl', typd, re.I):
-                item.DeleteAllItems()
-            if re.search('(checkbox|numctrl)', typd, re.I):
-                item.SetValue(0)
-            if re.search('datepickerctrl', typd, re.I):
-                item.SetValue(wx.DateTime())
-            if re.search('timectrl', typd, re.I):
-                item.SetValue('12:00am')
-            if re.search('grid', typd, re.I):
-                item.ClearGrid()
-                cols = item.GetNumberCols()
-                rows = item.GetNumberRows()
-                for xx in range(rows):
-                    for yy in range(cols):
-                        item.SetReadOnly(xx,yy,False)
-                        if fillwith is not None:
-                            item.SetCellValue(xx,yy,str(fillwith))
+#             if re.search('textctrl', typd, re.I):
+#                 item.SetValue('')
+#             if re.search('radiobox', typd, re.I):
+#                 item.SetSelection(0)
+#             if re.search('radiobutton', typd, re.I):
+#                 item.SetValue(0)
+#             if re.search('combobox', typd, re.I):
+#                 #item.Clear()
+#                 #blank_list = ['']
+#                 #item.SetItems(blank_list)
+#                 item.SetSelection(0)
+#             if re.search('listbox', typd, re.I):
+#                 item.Clear()
+#             if re.search('listctrl', typd, re.I):
+#                 item.DeleteAllItems()
+#             if re.search('(checkbox|numctrl)', typd, re.I):
+#                 item.SetValue(0)
+#             if re.search('datepickerctrl', typd, re.I):
+#                 item.SetValue(wx.DateTime())
+#             if re.search('timectrl', typd, re.I):
+#                 item.SetValue('12:00am')
+#             if re.search('grid', typd, re.I):
+#                 item.ClearGrid()
+#                 cols = item.GetNumberCols()
+#                 rows = item.GetNumberRows()
+#                 for xx in range(rows):
+#                     for yy in range(cols):
+#                         item.SetReadOnly(xx,yy,False)
+#                         if fillwith is not None:
+#                             item.SetCellValue(xx,yy,str(fillwith))
 
-    def GetCtrl(self):
-        name = self.name
-        item = wx.FindWindowByName(name)
-        typd = str(type(item))
+#     def GetCtrl(self):
+#         name = self.name
+#         item = wx.FindWindowByName(name)
+#         typd = str(type(item))
         
-        value = None
-        if re.search('filepickerctrl', typd, re.I):
-            return item.GetPath()
+#         value = None
+#         if re.search('filepickerctrl', typd, re.I):
+#             return item.GetPath()
         
-        if re.search('combobox', typd, re.I):
-            return item.GetValue()
+#         if re.search('combobox', typd, re.I):
+#             return item.GetValue()
         
-        if re.search('(txtctrl|textctrl)', typd, re.I):
-            if re.search('masked', typd, re.I):
-                return item.GetPlainValue()
-            else:
-                return item.GetValue()
+#         if re.search('(txtctrl|textctrl)', typd, re.I):
+#             if re.search('masked', typd, re.I):
+#                 return item.GetPlainValue()
+#             else:
+#                 return item.GetValue()
             
-        if re.search('statictext', typd, re.I):
-            return item.GetLabel()
+#         if re.search('statictext', typd, re.I):
+#             return item.GetLabel()
         
-        if re.search('checkbox', typd, re.I):
-            value = item.GetValue()
-            if value is True:
-                return 1
-            else:
-                return 0
+#         if re.search('checkbox', typd, re.I):
+#             value = item.GetValue()
+#             if value is True:
+#                 return 1
+#             else:
+#                 return 0
         
-        if re.search('timectrl', typd, re.I):
-            value = item.GetValue()
-            if value == '':
-                return 0
+#         if re.search('timectrl', typd, re.I):
+#             value = item.GetValue()
+#             if value == '':
+#                 return 0
 
-        if re.search('numctrl', typd, re.I):
-            value = item.GetValue()
-            if value == '' or value is None:
-                return 0
+#         if re.search('numctrl', typd, re.I):
+#             value = item.GetValue()
+#             if value == '' or value is None:
+#                 return 0
 
-        if re.search('radiobox', typd, re.I):
-            return item.GetSelection()
+#         if re.search('radiobox', typd, re.I):
+#             return item.GetSelection()
 
-        if re.search('radiobutton', typd, re.I):
-            value = item.GetValue()
-            if value is True:
-                return 1
-            if value is False:
-                return 0
+#         if re.search('radiobutton', typd, re.I):
+#             value = item.GetValue()
+#             if value is True:
+#                 return 1
+#             if value is False:
+#                 return 0
 
-        if re.search('listctrl', typd, re.I):
-            rows = item.GetItemCount()
-            cols = item.GetColumnCount()
-            listctrl_dict = {}
+#         if re.search('listctrl', typd, re.I):
+#             rows = item.GetItemCount()
+#             cols = item.GetColumnCount()
+#             listctrl_dict = {}
             
-            for row in range(rows):
-                tup = ()
-                for col in range(cols):
-                    typed = item.GetItem(row, col).GetText().upper()
-                    tup = tup + (typed,)
-                listctrl_dict[row] = tup
+#             for row in range(rows):
+#                 tup = ()
+#                 for col in range(cols):
+#                     typed = item.GetItem(row, col).GetText().upper()
+#                     tup = tup + (typed,)
+#                 listctrl_dict[row] = tup
                 
-            return json.dumps(listctrl_dict)
+#             return json.dumps(listctrl_dict)
         
-        if re.search('datepickerctrl', typd, re.I):
-            a = item.GetValue().FormatISODate()
-            print(f'Date Get : {a}')
-            return item.GetValue().FormatISODate()
+#         if re.search('datepickerctrl', typd, re.I):
+#             a = item.GetValue().FormatISODate()
+#             print(f'Date Get : {a}')
+#             return item.GetValue().FormatISODate()
         
-        if re.search('datectrl', typd, re.I):
-            return item.GetValue().FormatISODate()
+#         if re.search('datectrl', typd, re.I):
+#             return item.GetValue().FormatISODate()
             
-        if re.search('listbox', typd, re.I):
-            strings = item.GetStrings()
+#         if re.search('listbox', typd, re.I):
+#             strings = item.GetStrings()
             
-            if len(strings) > 0:
-                return json.dumps(strings)
+#             if len(strings) > 0:
+#                 return json.dumps(strings)
             
             
         
-        if re.search('grid', typd, re.I):
-            grid_dict = {}
-            for xx in range(item.GetNumberRows()):
-                LabelKey = item.GetRowLabelValue(xx).replace(" ", "_").lower()
-                valued = []
-                for yy in range(item.GetNumberCols()):
-                    #header = item.GetColLabelValue(yy)
-                    value = item.GetCellValue(xx, yy)
-                    valued.append(value)
+#         if re.search('grid', typd, re.I):
+#             grid_dict = {}
+#             for xx in range(item.GetNumberRows()):
+#                 LabelKey = item.GetRowLabelValue(xx).replace(" ", "_").lower()
+#                 valued = []
+#                 for yy in range(item.GetNumberCols()):
+#                     #header = item.GetColLabelValue(yy)
+#                     value = item.GetCellValue(xx, yy)
+#                     valued.append(value)
 
-                grid_dict[LabelKey] = (valued)
-            value = json.dumps(grid_dict)
+#                 grid_dict[LabelKey] = (valued)
+#             value = json.dumps(grid_dict)
         
         
-        valtype = str(type(value))
-        if re.search('(str|unicode)', valtype, re.I):
-            return value.strip()
+#         valtype = str(type(value))
+#         if re.search('(str|unicode)', valtype, re.I):
+#             return value.strip()
 
-        return value
+#         return value
 
-    def SetCtrl(self, value):
-        name = self.name
+#     def SetCtrl(self, value):
+#         name = self.name
         
-        item = wx.FindWindowByName(self.name)
-        typd = str(type(item))
-        valtype = str(type(value))
-        if 'tuple' in valtype:
-            value = VarOps().DeTupler(value)
-        #print "{} : {}\n{} : {}".format(name,typd,value,valtype)
-        self.ClearCtrl()
+#         item = wx.FindWindowByName(self.name)
+#         typd = str(type(item))
+#         valtype = str(type(value))
+#         if 'tuple' in valtype:
+#             value = VarOps().DeTupler(value)
+#         #print "{} : {}\n{} : {}".format(name,typd,value,valtype)
+#         self.ClearCtrl()
         
-        if 'str' in valtype:
-            value = value.strip()
-        if 'glpost' in name:
+#         if 'str' in valtype:
+#             value = value.strip()
+#         if 'glpost' in name:
             
-            if not value:
-                value = '145-010'
-            if not re.search('[0-9]+', value):
-                value = '000000'
+#             if not value:
+#                 value = '145-010'
+#             if not re.search('[0-9]+', value):
+#                 value = '000000'
 
         
-        if re.search('statictext', typd, re.I):
-            try:
-                item.SetLabel(str(value))
-            except:
-                print(f"Value : {str(value)}")
-        elif re.search('combobox', typd, re.I):
-            if 'list' in valtype:
-                try:
+#         if re.search('statictext', typd, re.I):
+#             try:
+#                 item.SetLabel(str(value))
+#             except:
+#                 print(f"Value : {str(value)}")
+#         elif re.search('combobox', typd, re.I):
+#             if 'list' in valtype:
+#                 try:
                     
-                    item.SetItems(value)
+#                     item.SetItems(value)
                     
-                except:
-                    print(f"value : {value}")
+#                 except:
+#                     print(f"value : {value}")
 
-            if re.search('(str|unicode)', valtype, re.I):
-                if not value:
-                    value = ''
-                if value == 0:
-                    value = '0'
-                try:
-                    item.SetValue(str(value))
-                except:
-                    print(f'value : {value}')
+#             if re.search('(str|unicode)', valtype, re.I):
+#                 if not value:
+#                     value = ''
+#                 if value == 0:
+#                     value = '0'
+#                 try:
+#                     item.SetValue(str(value))
+#                 except:
+#                     print(f'value : {value}')
 
-        elif re.search('textctrl', typd, re.I):
-            if not value:
-                value = ''
-            try:
-                item.SetValue(str(value))
-            except:
-                print(f'value : {value}')
+#         elif re.search('textctrl', typd, re.I):
+#             if not value:
+#                 value = ''
+#             try:
+#                 item.SetValue(str(value))
+#             except:
+#                 print(f'value : {value}')
 
-        elif re.search('timectrl', typd, re.I):
+#         elif re.search('timectrl', typd, re.I):
             
-            if value is None or value == 0 or value == '0':
-                value = '00:00:00'
+#             if value is None or value == 0 or value == '0':
+#                 value = '00:00:00'
             
-            if not re.search('[ap]m', str(value), re.I):
-                d = datetime.datetime.strptime(str(value), "%H:%M:%S")
-                value = d.strftime("%I:%M %p")
+#             if not re.search('[ap]m', str(value), re.I):
+#                 d = datetime.datetime.strptime(str(value), "%H:%M:%S")
+#                 value = d.strftime("%I:%M %p")
 
-            if not value or value == '':
+#             if not value or value == '':
                 
-                value = '12:00:00 AM'
-            try:
-                item.SetValue(value)
-            except:
-                print(f'value : {value}')
+#                 value = '12:00:00 AM'
+#             try:
+#                 item.SetValue(value)
+#             except:
+#                 print(f'value : {value}')
 
             
 
-        elif re.search('datepickerctrl', typd, re.I):
-            year, month, day = 0,0,0
+#         elif re.search('datepickerctrl', typd, re.I):
+#             year, month, day = 0,0,0
             
-            if value == '' or not re.search('[0-9]', str(value)):
+#             if value == '' or not re.search('[0-9]', str(value)):
                 
-                value = wx.DateTime()
-            else:
-                raw = str(value)
+#                 value = wx.DateTime()
+#             else:
+#                 raw = str(value)
                 
-                if re.search('-', raw):
-                    year, month, day = raw.split('-')
-                if re.search('/', raw):
-                    year, month, day = raw.split('/')
-                dt = wx.DateTime()
-                dtd = '{}/{}/{}'.format(day,month,year)
-                dt.ParseFormat(dtd, '%d/%m/%Y')
+#                 if re.search('-', raw):
+#                     year, month, day = raw.split('-')
+#                 if re.search('/', raw):
+#                     year, month, day = raw.split('/')
+#                 dt = wx.DateTime()
+#                 dtd = '{}/{}/{}'.format(day,month,year)
+#                 dt.ParseFormat(dtd, '%d/%m/%Y')
                 
                 
-                #Debugger("Y-{0} / M-{1} / D-{2}".format(year, month, day))
-                #datd = wx.DateTimeFromDMY(int(day), int(month), int(year))
-                value = dt
+#                 #Debugger("Y-{0} / M-{1} / D-{2}".format(year, month, day))
+#                 #datd = wx.DateTimeFromDMY(int(day), int(month), int(year))
+#                 value = dt
 
             
-            try:
-                item.SetValue(value)
-            except:
-                print(f'value : {value}')
+#             try:
+#                 item.SetValue(value)
+#             except:
+#                 print(f'value : {value}')
 
-        elif re.search('checkbox', typd, re.I):
+#         elif re.search('checkbox', typd, re.I):
             
-            if value is None or value == '':
-                value = 0
+#             if value is None or value == '':
+#                 value = 0
             
-            if value is True:
-                value = 1
+#             if value is True:
+#                 value = 1
             
-            elif value is False:
-                value = 0    
+#             elif value is False:
+#                 value = 0    
             
-            try:
-                item.SetValue(value)
-            except:
-                print(f'value : {value}')
-        elif re.search('filepickerctrl',typd, re.I):
-            if not value:
-                value = ''
-            try:
-                item.SetPath(value)    
-            except:
-                print(f'value : {value}')
+#             try:
+#                 item.SetValue(value)
+#             except:
+#                 print(f'value : {value}')
+#         elif re.search('filepickerctrl',typd, re.I):
+#             if not value:
+#                 value = ''
+#             try:
+#                 item.SetPath(value)    
+#             except:
+#                 print(f'value : {value}')
                 
-        elif re.search('numctrl', typd, re.I):
-            if not value:
-                value = 0
-            try:
-                item.SetValue(float(value))
-            except:
-                print(f'value : {value}')
+#         elif re.search('numctrl', typd, re.I):
+#             if not value:
+#                 value = 0
+#             try:
+#                 item.SetValue(float(value))
+#             except:
+#                 print(f'value : {value}')
 
-        elif re.search('listbox', typd, re.I):
-            if value:
-                valued = value
-            else:
-                valued = ''
-            if not valued:
-                pass
-            else:
-                try:
-                    item.InsertItems(valued, 0)
-                except:
-                    print(f'Value : {valued}')
+#         elif re.search('listbox', typd, re.I):
+#             if value:
+#                 valued = value
+#             else:
+#                 valued = ''
+#             if not valued:
+#                 pass
+#             else:
+#                 try:
+#                     item.InsertItems(valued, 0)
+#                 except:
+#                     print(f'Value : {valued}')
 
-        elif re.search('listctrl', typd, re.I):
-            if not value or value is None:
-                pass
-            else:
-                value = value
+#         elif re.search('listctrl', typd, re.I):
+#             if not value or value is None:
+#                 pass
+#             else:
+#                 value = value
 
-            rows = len(value)
-            hasRows = item.GetItemCount()
-            cols = item.GetColumnCount()
+#             rows = len(value)
+#             hasRows = item.GetItemCount()
+#             cols = item.GetColumnCount()
 
-            dd = """** ListCtrl Counts\n  Current Item : {0}\n  New Item : {1}
-            Column : {2}\n  Value : {3}""".format(hasRows, rows, cols, value)
+#             dd = """** ListCtrl Counts\n  Current Item : {0}\n  New Item : {1}
+#             Column : {2}\n  Value : {3}""".format(hasRows, rows, cols, value)
             
-            item.DeleteAllItems()
+#             item.DeleteAllItems()
 
-            for row in range(hasRows, rows):
+#             for row in range(hasRows, rows):
                 
-                for col in range(cols):
+#                 for col in range(cols):
                     
-                    if col == 0:
-                        new_row = str(row)
+#                     if col == 0:
+#                         new_row = str(row)
                         
                         
-                        item.InsertItem(row, value[new_row][col])
+#                         item.InsertItem(row, value[new_row][col])
 
-                    try:
+#                     try:
                         
-                        if value[new_row]:
-                            pass    
-                    except:
+#                         if value[new_row]:
+#                             pass    
+#                     except:
                         
-                        break
-                    else:
+#                         break
+#                     else:
                         
-                        item.SetItem(row, col, value[new_row][col])
+#                         item.SetItem(row, col, value[new_row][col])
 
-        elif re.search('radiobox', typd, re.I):
-            if not value:
-                value = 0
-            try:
-                item.SetSelection(int(value))
-            except:
-                print(f'value : {value}')
+#         elif re.search('radiobox', typd, re.I):
+#             if not value:
+#                 value = 0
+#             try:
+#                 item.SetSelection(int(value))
+#             except:
+#                 print(f'value : {value}')
 
-        elif re.search('radiobutton', typd, re.I):
-            if not value:
-                value = False
-            try:
-                item.SetValue(value)
-            except:
-                print(f'value : {value}')
+#         elif re.search('radiobutton', typd, re.I):
+#             if not value:
+#                 value = False
+#             try:
+#                 item.SetValue(value)
+#             except:
+#                 print(f'value : {value}')
 
-        elif re.search('grid', typd, re.I):
-            grid = wx.FindWindowByName(name)
-            if value:
-                grid_dict = value
+#         elif re.search('grid', typd, re.I):
+#             grid = wx.FindWindowByName(name)
+#             if value:
+#                 grid_dict = value
 
-                for xx in range(grid.GetNumberRows()):
-                    LabelKey = grid.GetRowLabelValue(xx).replace(" ", "_").lower()
-                    for yy in range(grid.GetNumberCols()):
-                        new_value = grid_dict[LabelKey][yy]
-                        grid.SetCellValue(xx, yy, new_value)
+#                 for xx in range(grid.GetNumberRows()):
+#                     LabelKey = grid.GetRowLabelValue(xx).replace(" ", "_").lower()
+#                     for yy in range(grid.GetNumberCols()):
+#                         new_value = grid_dict[LabelKey][yy]
+#                         grid.SetCellValue(xx, yy, new_value)
 
-    def EnableCtrl(self, enable=True):
-        name = self.name
+#     def EnableCtrl(self, enable=True):
+#         name = self.name
         
-        nametypd = str(type(name))
-        if 'list' in nametypd:
-            for item in name:
-                ctrl = wx.FindWindowByName(item)
-                ctrltypd = str(type(ctrl))
+#         nametypd = str(type(name))
+#         if 'list' in nametypd:
+#             for item in name:
+#                 ctrl = wx.FindWindowByName(item)
+#                 ctrltypd = str(type(ctrl))
                 
-                if re.search('(textctrl|numctrl)', ctrltypd, re.I):
-                    if enable is False:
-                        ctrl.SetEditable(editable=False)
-                        ctrl.Disable()
+#                 if re.search('(textctrl|numctrl)', ctrltypd, re.I):
+#                     if enable is False:
+#                         ctrl.SetEditable(editable=False)
+#                         ctrl.Disable()
                         
-                    else:
-                        ctrl.SetEditable(editable=True)
-                        ctrl.Enable()
+#                     else:
+#                         ctrl.SetEditable(editable=True)
+#                         ctrl.Enable()
                     
-                else:
-                    if enable is False:
-                        ctrl.Disable()
+#                 else:
+#                     if enable is False:
+#                         ctrl.Disable()
                         
-                    else:
-                        ctrl.Enable()
+#                     else:
+#                         ctrl.Enable()
 
-        elif 'str' in nametypd:
-            ctrl = wx.FindWindowByName(name)
-            ctrltypd = str(type(ctrl))
+#         elif 'str' in nametypd:
+#             ctrl = wx.FindWindowByName(name)
+#             ctrltypd = str(type(ctrl))
             
-            if re.search('(textctrl|numctrl)', ctrltypd, re.I):
-                if enable is False:
-                    ctrl.SetEditable(editable=False)
-                    ctrl.Disable()
+#             if re.search('(textctrl|numctrl)', ctrltypd, re.I):
+#                 if enable is False:
+#                     ctrl.SetEditable(editable=False)
+#                     ctrl.Disable()
                     
-                else:
-                    ctrl.SetEditable(editable=True)
-                    ctrl.Enable()
-            else:
-                if enable is False:
-                    ctrl.Disable()
+#                 else:
+#                     ctrl.SetEditable(editable=True)
+#                     ctrl.Enable()
+#             else:
+#                 if enable is False:
+#                     ctrl.Disable()
                     
-                else:
-                    ctrl.Enable()
+#                 else:
+#                     ctrl.Enable()
 
-    def ReturndSet(self, returnd, retnum=0):
-        name = self.name
-        if returnd is not None:
-                if 'tuple' in str(type(returnd)):
-                    ret = str(returnd[retnum])
-                else:
-                    ret = str(returnd)
+#     def ReturndSet(self, returnd, retnum=0):
+#         name = self.name
+#         if returnd is not None:
+#                 if 'tuple' in str(type(returnd)):
+#                     ret = str(returnd[retnum])
+#                 else:
+#                     ret = str(returnd)
 
-                setctrl = self.SetCtrl(ret)
+#                 setctrl = self.SetCtrl(ret)
 
 
 
@@ -1014,10 +1014,6 @@ class AccountOps(object):
             pout.v(f'Account Num : {account_num}')
             returnd = LookupDB(tableName).Count(fieldName)
             if not account_num in returnd:
-                # query = '''SELECT COUNT(*)
-                #         FROM {1} WHERE {0}=(?)'''.format(fieldName, tableName)
-                # data = (account_num,)
-                # returnd = SQConnect(query, data).ONE()
                 pout.v(f'Account Num Exist : {acct_num_exist}')
                 if returnd[0] == 0:
                     acct_num_exist = False
