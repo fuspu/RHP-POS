@@ -29,16 +29,14 @@ table_name = 'customer_codes'
 col_list = 'customer_code TEXT'
 a = Tabling(table_name, col_list, sql_file)
 a.CreateTable()
+
 testcol = 'customer_code'
 testdata = 'GOOD'
-a.InsertTestData(testcol, testdata)
+a.InsertTestData('customer_code', 'GOOD')
+a.InsertTestData('customer_code', 'SPICY')
+a.InsertTestData('customer_code', 'HOSTILE')
 
 
-# a = TableAware(table_name, sql_file, dbtype='sqlite3')
-# a.AddField('customer_code', char=30)
-# a.CreateTestItem('customer_code', "'GOOD'")
-# a.CreateTestItem('customer_code', "'SPICY'", extra=True)
-# a.CreateTestItem('customer_code', "'HOSTILE'", extra=True)
 
 # # Customer basic details
 # table_name = 'customer_basic_info'

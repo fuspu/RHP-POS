@@ -17,8 +17,8 @@ class DBConnect(object):
         self.START()
         
     def START(self):
-        con = sqlite3.connect(self.sql_file)        
-        self.cur = con.cursor()
+        self.con = sqlite3.connect(self.sql_file)        
+        self.cur = self.con.cursor()
         if len(self.data) > 0:
             self.cur.execute(self.query, self.data)
         else:
@@ -26,18 +26,20 @@ class DBConnect(object):
     
     def END(self):
         if re.search('(UPDATE|INSERT)', self.query, re.I):
-            con.commit()
+            self.con.commit()
     
-        con.close()
+        self.con.close()
 
     def ALL(self):
-        return self.cur.fetchall()
+        item = self.cur.fetchall()
         self.END()
-    
+        return item
+        
     def ONE(self):
-        return self.cur.fetchone()
+        item = self.cur.fetchone()
         self.END()
-
+        return item
+        
 
         
 class SQConnect(object):
@@ -231,11 +233,23 @@ class SQConnect(object):
     
 
 class LookupDB(object):
-    def __init__(self, table, sql_file, dbtype='sqlite3', debug=False):
+    def __init__(self, table, sql_file=None, dbtype='sqlite3', debug=False):
         self.table = table
         self.dbtype = dbtype
-        self.sql_file = sql_file
-    
+        self.sql_file = self.GetSQLFile(sql_file)
+        
+    def GetSQLFile(self, sql_file):
+        supportSQLFile = '../db/SUPPORT.sql'
+        if sql_file is None:
+            query = '''SELECT sql_file 
+                       FROM tableSupport 
+                       WHERE table_name=?'''
+            data = [self.table,]
+            returnd = DBConnect(query, data, supportSQLFile).ONE()
+            pout.v(f'GetSQLFILE : {returnd}')
+        
+        return returnd[0]
+
     def General(self, selectFields, limit=None):
         """Lookup in the database for a non-specific search.
 
@@ -265,7 +279,7 @@ class LookupDB(object):
         
         pout.v('Specific : {} ; Query : {} ; Data : {}'.format(returnd, query, data))
         #ty = self.Typed(returnd)
-        pout.v(f'Typed : {ty}')
+        #pout.v(f'Typed : {ty}')
         return returnd
        
     def Typed(self, its):
@@ -408,17 +422,45 @@ class Tabling(object):
         self.AddSupport()
 
     def InsertTestData(self, cols_list, data_list):
-        query = f'INSERT INTO {self.table_name}({cols_list}) VALUES (?);'
-        data = (data_list,)
-        pout.v(query, data)
-        returnd = DBConnect(query, data, self.sql_file)
+        newc, newd = self.CheckData(cols_list, data_list)
+        if len(newc) > 0:
+            query = f'INSERT INTO {self.table_name}({newc}) VALUES (?);'
+            data = (newd,)
+            pout.v(f'Insert New Test Data : {query}, {data}')
+            returnd = DBConnect(query, data, self.sql_file)
 
     def AddSupport(self):
-        support_sql = '../db/SUPPORT.sql'
-        suptable = 'tableSupport'
-        query = f'INSERT INTO {suptable} (sql_file, table_name) VALUES (?, ?)'
-        data = (self.sql_file, self.table_name)
-        returnd = DBConnect(query, data, support_sql).ONE()
+        newc, newd = self.CheckData('sql_file, table_name', f'{self.sql_file}, {self.table_name}')
+        if len(newc) > 0:
+            pout.b(f'Adding to tableSupport where {self.table_name} is in {self.sql_file}')
+            support_sql = '../db/SUPPORT.sql'
+            suptable = 'tableSupport'
+            query = f'INSERT INTO {suptable} (sql_file, table_name) VALUES (?, ?)'
+            data = (self.sql_file, self.table_name,)
+            returnd = DBConnect(query, data, support_sql).ONE()
+
+    def CheckData(self,cols_list, data_list):
+        pout.v('Check Data in case of duplicates...')
+        cols = cols_list.split(",")
+        datas = data_list.split(",")
+        newcols = []
+        newdatas = []
+        cols_len = len(cols)
+        pout.v(cols_len)
+        pout.v(newcols)
+        pout.v(newdatas)
+        for i in range(cols_len):
+            pout.v(i)
+            checkd = LookupDB(self.table_name).Specific(datas[0], cols[0], '*')
+            pout.v(f'checkd for test insert data : {checkd}')
+            if len(checkd) == 0:
+                newcols.append(cols[i])
+                newdatas.append(datas[i])
+
+        newc = ", ".join(newcols)
+        newd = ", ".join(newdatas)
+        pout.v(f'New_Cols : {newc} ; new_Data : {newd}')
+        return newc, newd
 
 
 class TableAware(object):

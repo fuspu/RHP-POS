@@ -23,7 +23,16 @@ class Item_Lookup(object):
                 
                 }
     """
-    def __init__(self):
+    def __init__(self, upc):
+        self.upc = upc
 
-    def 
+
+    def GetBasics(self):
+        query = '''SELECT upc, description, cost, retail, taxable, onhandqty 
+                   FROM item_detailed 
+                   WHERE upc=(?)'''
+        data = [self.upc,]
+        returnd = DBConnect(query, data).ALL()
+        
+
 
