@@ -5,6 +5,7 @@ import pymysql
 import sqlite3
 import fdb
 import time
+from pathlib import Path
 from var_operations import VarOps
 
 
@@ -240,15 +241,16 @@ class LookupDB(object):
         
     def GetSQLFile(self, sql_file):
         supportSQLFile = '../db/SUPPORT.sql'
+        item = sql_file
         if sql_file is None:
             query = '''SELECT sql_file 
                        FROM tableSupport 
                        WHERE table_name=?'''
             data = [self.table,]
             returnd = DBConnect(query, data, supportSQLFile).ONE()
-            pout.v(f'GetSQLFILE : {returnd}')
-        
-        return returnd[0]
+            #pout.v(f'GetSQLFILE : {returnd}')
+            item = returnd[0]
+        return item
 
     def General(self, selectFields, limit=None):
         """Lookup in the database for a non-specific search.
@@ -277,7 +279,7 @@ class LookupDB(object):
         data = [whereValue,]
         returnd = DBConnect(query, data, sql_file=self.sql_file).ALL()
         
-        pout.v('Specific : {} ; Query : {} ; Data : {}'.format(returnd, query, data))
+        #pout.v('Specific : {} ; Query : {} ; Data : {}'.format(returnd, query, data))
         #ty = self.Typed(returnd)
         #pout.v(f'Typed : {ty}')
         return returnd
@@ -304,12 +306,12 @@ class LookupDB(object):
         data = [whereValue,]
         if not whereValue:
             data = []
-        pout.v(f'Where : {query}\n Data : {data}')
+        #pout.v(f'Where : {query}\n Data : {data}')
         returnd = DBConnect(query, data, sql_file=self.sql_file).ONE()
         # if len(returnd) == 0:
         #     returnd = (None,)
 
-        pout.v(f'Count : {returnd}')
+        #pout.v(f'Count : {returnd}')
         return returnd
 
 
@@ -419,39 +421,41 @@ class Tabling(object):
         data = []
         pout.v(query, data)
         returnd = DBConnect(query, data, self.sql_file)
-        self.AddSupport()
+        
 
     def InsertTestData(self, cols_list, data_list):
-        newc, newd = self.CheckData(cols_list, data_list)
+        newc, newd = self.CheckData(cols_list, data_list, checkSqlFile=self.sql_file)
         if len(newc) > 0:
-            query = f'INSERT INTO {self.table_name}({newc}) VALUES (?);'
-            data = (newd,)
+            query = f'INSERT INTO {self.table_name}({newc}) VALUES ({newd});'
+            data = []
             pout.v(f'Insert New Test Data : {query}, {data}')
             returnd = DBConnect(query, data, self.sql_file)
 
-    def AddSupport(self):
-        newc, newd = self.CheckData('sql_file, table_name', f'{self.sql_file}, {self.table_name}')
+    def AddSupport(self, tableName, sqlFile):
+        sql_file = Path(sqlFile).name
+        newc, newd = self.CheckData('sql_file, table_name', f'{sql_file}, {tableName}', checkSqlFile='../db/SUPPORT.sql')
         if len(newc) > 0:
-            pout.b(f'Adding to tableSupport where {self.table_name} is in {self.sql_file}')
+            pout.b(f'Adding to tableSupport where {tableName} is in {sql_file}')
             support_sql = '../db/SUPPORT.sql'
             suptable = 'tableSupport'
             query = f'INSERT INTO {suptable} (sql_file, table_name) VALUES (?, ?)'
-            data = (self.sql_file, self.table_name,)
+            data = (sql_file, tableName,)
             returnd = DBConnect(query, data, support_sql).ONE()
 
-    def CheckData(self,cols_list, data_list):
+    def CheckData(self, cols_list, data_list, checkSqlFile):
         pout.v('Check Data in case of duplicates...')
+        pout.v(f'\tCols : {cols_list} ; Datas : {data_list}')
         cols = cols_list.split(",")
         datas = data_list.split(",")
         newcols = []
         newdatas = []
+        pout.v(f'split cols : {cols} ; split datas : {datas}')
         cols_len = len(cols)
-        pout.v(cols_len)
-        pout.v(newcols)
-        pout.v(newdatas)
         for i in range(cols_len):
             pout.v(i)
-            checkd = LookupDB(self.table_name).Specific(datas[0], cols[0], '*')
+            pout.v(f'CheckData Table : {self.table_name}')
+            pout.v(f'Checking Cols : {cols[i]} ; Datas : {datas[i]}')
+            checkd = LookupDB(self.table_name, sql_file=checkSqlFile).Specific(datas[i], cols[i], '*')
             pout.v(f'checkd for test insert data : {checkd}')
             if len(checkd) == 0:
                 newcols.append(cols[i])

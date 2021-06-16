@@ -20,6 +20,7 @@ table_name = 'tableSupport'
 cols = 'sql_file TEXT, table_name TEXT'
 a = Tabling(table_name, cols, sql_file)
 a.CreateTable()
+a.AddSupport(table_name, sql_file)
 
 ################## Customer Related Tables ##########################
 # Customer Codes
@@ -37,35 +38,38 @@ a.InsertTestData('customer_code', 'SPICY')
 a.InsertTestData('customer_code', 'HOSTILE')
 
 
+table_name = 'customer_basic_info'
+cols_list = '''cust_num text primary key,
+               first_name text,
+               last_name text,
+               middle_initial text,
+               suffix text,
+               prefix text,
+               address_acct_num text,
+               phone_numbers text,
+               email_addr text,
+               tax_exempt_number text,
+               typecode text,
+               rental_of text,
+               statement_terms text,
+               contact1 text,
+               contact2 text,
+               account_type text,
+               alt_post_acct text,
+               date_added text,
+               last_maintained text,
+               last_sale text,
+               last_layaway text,
+               birthday text,
+               charge_priviledge_expiry, integer,
+               full_name text'''
+a = Tabling(table_name, cols_list, sql_file)       
+a.CreateTable()
 
-# # Customer basic details
-# table_name = 'customer_basic_info'
-# a = TableAware(table_name, sql_file, dbtype='sqlite3')
-# a.AddField('cust_num', char=30, primary_key=True)
-# a.AddField('first_name', char=30)
-# a.AddField('last_name', char=30)
-# a.AddField('middle_initial', char=6)
-# a.AddField('suffix', char=6)
-# a.AddField('prefix', char=6)
-# a.AddField('address_acct_num', char=90)
-# a.AddField('phone_numbers', text='')
-# a.AddField('email_addr', char=50)
-# a.AddField('tax_exempt_number', char=30)
-# a.AddField('typecode', char=12)
-# a.AddField('rental_of',text='')
-# a.AddField('statement_terms', text='')
-# a.AddField('contact1', char=120)
-# a.AddField('contact2', char=120)
-# a.AddField('account_type', char=20)
-# a.AddField('alt_post_acct', char=10)
-# a.AddField('date_added', date='')
-# a.AddField('last_maintained', date='')
-# a.AddField('last_sale', date='')
-# a.AddField('last_layaway', date='')
-# a.AddField('birthday', char=15)
-# a.AddField('charge_priviledge_expiry', integer=11)
-# a.AddField('full_name', char=130)
-
+col_list = 'cust_num, first_name, last_name, date_added'
+ah = datetime.date.today().strftime('%Y-%m-%d')
+data_list = f"Test1, Alvin, Acres, {ah}"
+a.InsertTestData(col_list, data_list)
 # #returnd = CheckEntries(sql_file, table_name)
 
 # #ah = datetime.date.today().strftime('%Y-%m-%d')
