@@ -558,7 +558,7 @@ class TableAware(object):
     def AddField(self, fieldname, char=None, varchar=None, integer=None, text=None, date=None, bool=None, time=None, decimal=None, primary_key=False, defaults=None):
         addTable = self.CheckTable()
         if self.dbtype == 'sqlite3':
-            defn = {'char':char, 'varchar':varchar, 'int':integer, 'text':text, 'date':date, 'bool':bool, 'time':time, 'decimal':decimal, 'primary_key':primary_key, 'defaults':defaults}    
+            defn = {'text':char, 'text':varchar, 'int':integer, 'text':text, 'date':date, 'bool':bool, 'time':time, 'decimal':decimal, 'primary_key':primary_key, 'defaults':defaults}    
         if self.dbtype == 'mysql':
             defn = {'char':char, 'varchar':varchar, 'int':integer, 'text':text, 'date':date, 'bool':bool, 'time':time, 'decimal':decimal, 'primary_key':primary_key, 'defaults':defaults}
         

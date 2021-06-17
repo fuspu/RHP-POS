@@ -70,34 +70,28 @@ col_list = 'cust_num, first_name, last_name, date_added'
 ah = datetime.date.today().strftime('%Y-%m-%d')
 data_list = f"Test1, Alvin, Acres, {ah}"
 a.InsertTestData(col_list, data_list)
-# #returnd = CheckEntries(sql_file, table_name)
-
-# #ah = datetime.date.today().strftime('%Y-%m-%d')
-# #names = 'cust_num, first_name, last_name, date_added'
-# #values = f"'Test1', 'Alvin', 'Acres', '{ah}'"
-# #pout.v("{} -- {}".format(names, values))
-# #a.CreateTestItem(names, values )
 
 # # Address Accounts
-# table_name = 'address_accounts'
-# a = TableAware(table_name, sql_file, dbtype='sqlite3')
-# a.AddField('addr_acct_num', char=90, primary_key=True)
-# a.AddField('street_num', char=12)
-# a.AddField('street_direction', char=10)
-# a.AddField('street_name', char=30)
-# a.AddField('street_type', char=12)
-# a.AddField('unit', char=12)
-# a.AddField('address0', char=120)
-# a.AddField('address2', char=50)
-# a.AddField('address3', char=50)
-# a.AddField('city', char=30)
-# a.AddField('state', char=3)
-# a.AddField('zipcode', char=15)
-# a.AddField('transactions', text='')
 
+table_name = 'address_accounts'
+cols_list = '''addr_acct_num text,
+               street_num text,
+               street_direction text,
+               street_name text,
+               street_type text,
+               unit text,
+               address0 text,
+               address2 text,
+               address3 text,
+               city text,
+               state text,
+               zipcode text,
+               transactions text'''
+a = Tabling(table_name, cols_list, sql_file)
 
 # # Customer Sales Options
-# table_name = 'customer_sales_options'
+table_name = 'customer_sales_options'
+cols_list = '''cust_num char
 # a = TableAware(table_name, sql_file, dbtype='sqlite3')
 # a.AddField('cust_num', char=20, primary_key=True)
 # a.AddField('tax_exempt', integer=11, defaults=0)
