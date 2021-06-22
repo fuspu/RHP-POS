@@ -1,4 +1,4 @@
-#!/bin/python
+!/bin/python
 #-*- coding: utf-8 -*-
 
 #
@@ -31,7 +31,7 @@ def CreateTable(sql_file, table_name, column_info):
             print("Table {0} Exists".format(exists))
 
 
-def CheckEntries(sql_file, table_name):
+def CheckEntries(sql_file):
     query = 'SELECT COUNT(*) FROM {}'.format(table_name)
     data = ''
     returnd = HU.SQConnect(query, data, sql_file).ONE()

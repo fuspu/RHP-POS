@@ -466,6 +466,27 @@ class Tabling(object):
         pout.v(f'New_Cols : {newc} ; new_Data : {newd}')
         return newc, newd
 
+    def CheckEntries(self):
+        query = 'SELECT COUNT(*) FROM {}'.format(self.table_name)
+        data = ''
+        returnd = SQConnect(query, data, self.sql_file).ONE()
+        return returnd
+
+    def CreateTestItem(self, col_names, values, extra=False):
+        ents = self.CheckEntries()
+        if ents == 0 or extra is True:
+            do_list = []
+            typd = str(type(values))
+            if 'list' in typd:
+                for item in values:
+                    query = f'INSERT INTO {self.table_name}({col_names}) VALUES ({item});'
+                    data = ''
+                    DBConnect(query, data, self.sql_file).ONE()
+            if 'str' in typd:
+                query = f'INSERT INTO {self.table_name}({col_names}) VALUES ({values});'
+                data = ''
+                DBConnect(query, data, self.sql_file).ONE()
+
 
 class TableAware(object):
     def __init__(self, table_name, sql_file=None, dbtype='sqlite3'):
