@@ -20,7 +20,7 @@ table_name = 'tableSupport'
 cols = 'sql_file TEXT, table_name TEXT'
 a = Tabling(table_name, cols, sql_file)
 a.CreateTable()
-a.AddSupport(table_name, sql_file)
+
 
 ################## Customer Related Tables ##########################
 # Customer Codes
@@ -30,6 +30,8 @@ table_name = 'customer_codes'
 col_list = 'customer_code TEXT'
 a = Tabling(table_name, col_list, sql_file)
 a.CreateTable()
+
+
 returnd = a.CheckEntries()
 if returnd == 0:
     testcol = 'customer_code'
@@ -67,6 +69,7 @@ cols_list = '''cust_num text primary key,
 a = Tabling(table_name, cols_list, sql_file)       
 a.CreateTable()
 
+
 col_list = 'cust_num, first_name, last_name, date_added'
 ah = datetime.date.today().strftime('%Y-%m-%d')
 data_list = f"'Test1', 'Alvin', 'Acres', '{ah}'"
@@ -91,7 +94,6 @@ a = Tabling(table_name, cols_list, sql_file)
 a.CreateTable()
 
 
-
 # # Customer Sales Options
 table_name = 'customer_sales_options'
 cols_list = '''cust_num text primary key,
@@ -107,6 +109,7 @@ cols_list = '''cust_num text primary key,
 a = Tabling(table_name, cols_list, sql_file)               
 a.CreateTable()
 
+
 # Customer Accounts Receivables
 table_name = 'customer_accts_receivable'
 cols_list = '''cust_num text primary key,
@@ -121,6 +124,7 @@ cols_list = '''cust_num text primary key,
 a = Tabling(table_name, cols_list, sql_file)
 a.CreateTable()
 
+
 # Customer Ship To Info
 table_name = 'customer_shipto_info'
 cols_list = '''cust_num text primary key,
@@ -132,12 +136,14 @@ cols_list = '''cust_num text primary key,
 a = Tabling(table_name, cols_list, sql_file)
 a.CreateTable()
 
+
 # Customer Notes
 table_name = 'customer_notes'
 cols_list = '''cust_num text primary key,
                notes text'''
 a = Tabling(table_name, cols_list, sql_file)
 a.CreateTable()
+
 
 # Customer Security Photos & Facial Recognition
 table_name = 'customer_security'
@@ -921,7 +927,7 @@ a.CreateTestItem('store_num', "0")
 table_name = 'payment_methods'
 cols_list = '''store_num integer primary key,
                cash integer default 1,
-               check integer default 1, 
+               checks integer default 1, 
                charge integer default 0,
                credit_card integer default 1,
                debit_card integer default 1,
@@ -1095,7 +1101,13 @@ a.CreateTable()
 
 # sql_file = '../db/SUPPORT.sql'
 # table_name = 'tableSupport'
-# a = TableAware(table_name, sql_file, dbtype='sqlite3')
+# cols_list = '''sql_file text, 
+#                table_name text'''
+# a = Tabling(table_name, cols_list, sql_file)               
+# a.CreateTable()
+# a.CreateTestItem('sql_file, table_name', 'CUSTOMERS.sql, customer_codes', sql_file)
+# a.CreateTestItem('sql_file, table_name', 'CUSTOMERS.sql, customer_basic_infocodes', sql_file, extra=True)
+
 # a.AddField('sql_file', text='')
 # a.AddField('table_name', text='')
 

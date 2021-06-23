@@ -421,7 +421,7 @@ class Tabling(object):
         data = []
         pout.v(query, data)
         returnd = DBConnect(query, data, self.sql_file)
-        
+        #self.AddSupport()
 
     def InsertTestData(self, cols_list, data_list):
         newc, newd = self.CheckData(cols_list, data_list, checkSqlFile=self.sql_file)
@@ -431,16 +431,25 @@ class Tabling(object):
             pout.v(f'Insert New Test Data : {query}, {data}')
             returnd = DBConnect(query, data, self.sql_file)
 
-    def AddSupport(self, tableName, sqlFile):
-        sql_file = Path(sqlFile).name
-        newc, newd = self.CheckData('sql_file, table_name', f'{sql_file}, {tableName}', checkSqlFile='../db/SUPPORT.sql')
-        if len(newc) > 0:
-            pout.b(f'Adding to tableSupport where {tableName} is in {sql_file}')
+    def AddSupport(self):
+        supcheck = self.CheckSupport()
+        pout.v(supcheck)
+        if supcheck > 0:
+            pout.b(f'Adding to tableSupport where {self.table_name} is in {self.sql_file}')
             support_sql = '../db/SUPPORT.sql'
             suptable = 'tableSupport'
-            query = f'INSERT INTO {suptable} (sql_file, table_name) VALUES (?, ?)'
-            data = (sql_file, tableName,)
+            values = f'{self.sql_file}, {self.table_name}'
+            query = f'INSERT INTO {suptable} (sql_file, table_name) VALUES ({values})'
+            data = ''
             returnd = DBConnect(query, data, support_sql).ONE()
+
+    def CheckSupport(self):
+        support_sql = '../db/SUPPORT.sql'
+        query = f"SELECT * FROM tableSupport WHERE table_name = {self.table_name}"
+        data = ''
+        returnd = DBConnect(query, data, support_sql).ONE()
+        pout.v(query)
+        return returnd
 
     def CheckData(self, cols_list, data_list, checkSqlFile):
         pout.v('Check Data in case of duplicates...')
@@ -477,16 +486,18 @@ class Tabling(object):
         if ents == 0 or extra is True:
             do_list = []
             typd = str(type(values))
-            if 'list' in typd:
-                for item in values:
-                    query = f'INSERT INTO {self.table_name}({col_names}) VALUES ({item});'
+            try:
+                if 'list' in typd:
+                    for item in values:
+                        query = f'INSERT INTO {self.table_name}({col_names}) VALUES ({item});'
+                        data = ''
+                        DBConnect(query, data, self.sql_file).ONE()
+                if 'str' in typd:
+                    query = f'INSERT INTO {self.table_name}({col_names}) VALUES ({values});'
                     data = ''
                     DBConnect(query, data, self.sql_file).ONE()
-            if 'str' in typd:
-                query = f'INSERT INTO {self.table_name}({col_names}) VALUES ({values});'
-                data = ''
-                DBConnect(query, data, self.sql_file).ONE()
-
+            except sqlite3.IntegrityError:
+                print('Duplicate Detected')
 
 class TableAware(object):
     def __init__(self, table_name, sql_file=None, dbtype='sqlite3'):
