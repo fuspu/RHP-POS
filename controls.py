@@ -9,16 +9,76 @@ from ObjectListView import ObjectListView, ColumnDefn
 #---------------------------------------------------------------------------------------
 class LoadSaveList(object):
     def __init__(self):
-        self.listd = []
-    
+        self.listd = ()
+        self.lsl_dict = {}
+
     def Add(self, item):
-        self.listd.append(item)
+        self.listd += (item,)
     
     def Show(self):
         pout.v(self.listd)
 
     def Get(self):
         return self.listd
+
+    def To_Dict(self):
+        selects = ()
+        for i in self.listd:
+            tableName = i.tableName
+            fieldName = i.fieldName
+            if not tableName in self.lsl_dict:
+                self.lsl_dict[tableName] = {}
+            
+            selects += (fieldName,)
+            self.lsl_dict[tableName].update({'selects':selects}) 
+            if not fieldName in self.lsl_dict[tableName]:
+                self.lsl_dict[tableName][fieldName] = {}
+            
+            self.lsl_dict[tableName][fieldName] = {'get':i.GetCtrl, 'sqlfile':i.sqlfile, 'saveAs':i.saveAs, 'loadAs':i.loadAs, 'set':'', 'obj':i}
+
+        return self.lsl_dict
+
+    def GetSelectQD(self, tuple_of_fields, where=None):
+        lsl = self.To_Dict()
+        selects = ','.join(tuple_of_fields)
+        for tableName in lsl:
+            if tuple_of_fields[0] in lsl[tableName]:
+                if where is None:
+                    q = f'SELECT {selects} FROM {tableName}'
+                    d = ()
+                else:
+                    q = f'SELECT {selects} FROM {tableName} WHERE {where}=?'
+                    d = (lsl[tableName][where]['get'],)
+                
+                sqlfile = lsl[tableName][tuple_of_fields[0]]['sqlfile']
+
+                pout.v(sqlfile)
+                return q, d, sqlfile
+
+    def UpdateQD(self, tuple_of_fields, where=None):
+        lsl = self.To_Dict()
+        selects = ','.join(tuple_of_fields)
+        setd = ()
+        vald = ()
+        for tableName in lsl:
+            for fld in tuple_of_fields:
+                setd += (f'{fld}=?',)
+                vald += (lsl[tableName][fld]['get'],)
+            
+            update_fields = ','.join(setd)
+            vald += (lsl[tableName][where]['get'],)
+            #update_vals = ','.join(vald)
+
+            for tableName in lsl:
+                if tuple_of_fields[0] in lsl[tableName]:
+                    q = f'UPDATE {tableName} SET {update_fields} WHERE {where}=?'
+                    d = vald
+                    sqlfile = lsl[tableName][tuple_of_fields[0]]['sqlfile']
+                    print(q, d, sqlfile)
+                    return q, d, sqlfile
+
+
+
 
 
 #---------------------------------------------------------------------------------------
@@ -292,6 +352,7 @@ class RH_LoadSaveString(object):
     def __init__(self, *args, **kwargs):
         self.tableName = None
         self.fieldName = None
+        self.sqlfile = None
         self.saveAs = 'str'
         self.loadAs = 'str'
         pout.b(self.loadAs)

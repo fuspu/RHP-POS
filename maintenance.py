@@ -196,7 +196,7 @@ class GeneralInfoTab(wx.Panel):
         name = 'geninfo_zipcode_txtctrl'
         self.zipcode_tc =RH_MTextCtrl(self, -1, name=name, size=(90, -1), mask='#####')
         self.zipcode_tc.tableName = 'basic_store_info'
-        self.zipcode_tc.fieldName = 'zipcode'
+        self.zipcode_tc.fieldName = 'zip'
         self.zipcode_tc.sqlfile = './db/CONFIG.sql'
         self.zipcode_tc.loadAs = 'str'
         self.zipcode_tc.saveAs = 'str'
@@ -329,59 +329,54 @@ class GeneralInfoTab(wx.Panel):
     
     def onLoad(self, event):
         storeNum = self.storenum_tc.GetValue()
-        listd = self.LSL.Get()
-        load_dict = {}
-        for i in listd:
-            tableName = i.tableName
-            pout.v(tableName)
-            fieldName = i.fieldName
-            pout.v(fieldName)
-            if not tableName in load_dict:
-                load_dict[tableName] = {}
-            
-            load_dict[tableName].update({fieldName:''})
-
-        pout.v(load_dict)
-        
-        print(load_dict['basic_store_info'].keys())
-        #for key, key, 
-        sqlfile = self.storenum_tc.sqlfile
-        q = 'SELECT store_num, name, address1, address2, city, state, zip, phone1, phone2, fax, email, website, logo FROM basic_store_info'
-        d = ()
+        listd = self.LSL.To_Dict()
+        print(listd)
+        q, d, sqlfile = self.LSL.GetSelectQD(listd['basic_store_info']['selects'])
         r = SQConnect(q, d, sqlfile).ONE()
-        
-        self.storenum_tc.SetCtrl(r[0])
-        self.storename_tc.SetCtrl(r[1])
-        self.address1_tc.SetCtrl(r[2])
-        self.address2_tc.SetCtrl(r[3])
-        self.city_tc.SetCtrl(r[4])
-        self.state_tc.SetCtrl(r[5])
-        self.zipcode_tc.SetCtrl(r[6])
-        self.phone1_tc.SetCtrl(r[7])
-        self.phone2_tc.SetCtrl(r[8])
-        self.fax_tc.SetCtrl(r[9])
-        self.email_tc.SetCtrl(r[10])
-        self.website_tc.SetCtrl(r[11])
-        self.filepicker_c.SetCtrl(r[12])
-        self.LogoPreview(event='')
 
+        for key in listd:
+            # selects = ','.join(listd[key]['selects'])
+            # q = f'SELECT {selects} FROM {key}'
+            # d = ()
+            print(q,d, sqlfile)
+            r = SQConnect(q, d, sqlfile).ONE()
+
+            idx = 0            
+            for i in listd[key]['selects']:
+                listd[key][i].update({'set':r[idx]})
+                idx += 1
+
+            pout.v(listd)
+
+            for i in listd[key]:
+                print(f'listd[{key}][{i}]')
+                if not 'selects' in i:
+                    setItem = listd[key][i]['set']
+                    objItem = listd[key][i]['obj']
+                    objItem.SetCtrl(setItem)
+            
         
     def onSave(self, event):
-        #pout.v(self.LSL.Get())
-        sqlfile = self.storenum_tc.sqlfile
-        storenumd = self.storenum_tc.GetCtrl()
-        named = self.storename_tc.GetCtrl()
-        addr1 = self.address1_tc.GetCtrl()
-        addr2 = self.address2_tc.GetCtrl()
-        cityd = self.city_tc.GetCtrl()
-        stated = self.state_tc.GetCtrl()
-        zipd = self.zipcode_tc.GetCtrl()
-        phon1d = self.phone1_tc.GetCtrl()
-        phon2d = self.phone2_tc.GetCtrl()
-        faxd = self.fax_tc.GetCtrl()
-        emaild = self.email_tc.GetCtrl()
-        sited = self.website_tc.GetCtrl()
-        logod = self.filepicker_c.GetCtrl()
+        listd = self.LSL.To_Dict()
+        q,d, sqlfile = self.LSL.UpdateQD(listd['basic_store_info']['selects'], 'store_num')
+        r = SQConnect(q, d, sqlfile).ONE()
+
+
+
+        # sqlfile = self.storenum_tc.sqlfile
+        # storenumd = self.storenum_tc.GetCtrl()
+        # named = self.storename_tc.GetCtrl()
+        # addr1 = self.address1_tc.GetCtrl()
+        # addr2 = self.address2_tc.GetCtrl()
+        # cityd = self.city_tc.GetCtrl()
+        # stated = self.state_tc.GetCtrl()
+        # zipd = self.zipcode_tc.GetCtrl()
+        # phon1d = self.phone1_tc.GetCtrl()
+        # phon2d = self.phone2_tc.GetCtrl()
+        # faxd = self.fax_tc.GetCtrl()
+        # emaild = self.email_tc.GetCtrl()
+        # sited = self.website_tc.GetCtrl()
+        # logod = self.filepicker_c.GetCtrl()
 
         q = '''UPDATE basic_store_info 
                SET name=?
