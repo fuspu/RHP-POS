@@ -7,7 +7,7 @@ import time
 import numpy
 import xml.etree.cElementTree as ET
 from wx.lib.masked import NumCtrl, Ctrl, TextCtrl
-from controls import RH_TextCtrl, RH_CheckBox, RH_ComboBox, RH_OLV, RH_Button, RH_ListBox, GridOps, Themes
+from controls import RH_TextCtrl, RH_CheckBox, RH_ComboBox, RH_OLV, RH_Button, RH_ListBox, GridOps, Themes, tSizer
 import datetime
 import pout
 from utils import IconPanel, EventOps
@@ -37,64 +37,70 @@ class MainOptionsTab(wx.Panel):
 
         choiced = ['                             ']
         self.deptcombo = RH_ComboBox(self, choices=choiced, style=wx.CB_SORT)
-        self.deptcombo.SetHint('Department')
         self.deptcombo.tableName = 'item_options'
         self.deptcombo.fieldName = 'department'
+        self.deptcombo.sqlfile = 'INVENTORY.sql'
         self.deptcombo.defTable = 'organizations'
         self.deptcombo.defField = 'department'
+        tS = tSizer(self, text="Department", ctrl=self.deptcombo)
+        secondlevelSizer.Add(tS, 0, wx.ALL|wx.EXPAND, 3)
 
         self.catcombo = RH_ComboBox(self, choices=choiced, style=wx.CB_SORT)
-        self.catcombo.SetHint('Category')
         self.catcombo.tableName = 'item_options'
         self.catcombo.fieldName = 'category'
         self.catcombo.defTable = 'organizations'
         self.catcombo.defField = 'category'
-        
+        self.catcombo.sqlfile = 'INVENTORY.sql'
+        tS = tSizer(self, text="Category", ctrl=self.catcombo)
+        secondlevelSizer.Add(tS, 0, wx.ALL|wx.EXPAND, 3)
+
         self.subcatcombo = RH_ComboBox(self, choices=choiced, style=wx.CB_SORT)
-        self.subcatcombo.SetHint('SubCategory')
         self.subcatcombo.tableName = 'item_options'
         self.subcatcombo.fieldName = 'subcategory'
         self.subcatcombo.defTable = 'organizations'
         self.subcatcombo.defField = 'subcategory'
-        
+        tS = tSizer(self, text="SubCategory", ctrl=self.subcatcombo)
+        secondlevelSizer.Add(tS, 0, wx.ALL|wx.EXPAND, 3)
+
         self.matcombo = RH_ComboBox(self, choices=choiced, style=wx.CB_SORT)
-        self.matcombo.SetHint('Material')
         self.matcombo.tableName = 'item_options'
         self.matcombo.fieldName = 'material'
         self.matcombo.defTable = 'organizations'
         self.matcombo.defField = 'material'
-        
+        tS = tSizer(self, text="Material", ctrl=self.matcombo)
+        secondlevelSizer.Add(tS, 0, wx.ALL|wx.EXPAND, 3)
+
+
         self.unitcombo = RH_ComboBox(self, choices=choiced, style=wx.CB_SORT)
-        self.unitcombo.SetHint('Unit Type')
         self.unitcombo.tableName = 'item_options'
         self.unitcombo.fieldName = 'unit_type'
         self.unitcombo.defTable = 'organizations'
         self.unitcombo.defField = 'unit_type'
-        
+        tS = tSizer(self, text="Unit Type", ctrl=self.unitcombo)
+        secondlevelSizer.Add(tS, 0, wx.ALL|wx.EXPAND, 3)
+
 
            
-        secondlevelSizer.Add(self.deptcombo, 0, wx.ALL|wx.EXPAND, 3)
-        secondlevelSizer.Add(self.catcombo, 0, wx.ALL|wx.EXPAND, 3)
-        secondlevelSizer.Add(self.subcatcombo, 0, wx.ALL|wx.EXPAND, 3)
-        secondlevelSizer.Add(self.matcombo, 0, wx.ALL|wx.EXPAND, 3)
-        secondlevelSizer.Add(self.unitcombo, 0, wx.ALL|wx.EXPAND, 3)
+        #secondlevelSizer.Add(self.deptcombo, 0, wx.ALL|wx.EXPAND, 3)
+        # secondlevelSizer.Add(self.catcombo, 0, wx.ALL|wx.EXPAND, 3)
+        # secondlevelSizer.Add(self.subcatcombo, 0, wx.ALL|wx.EXPAND, 3)
+        # secondlevelSizer.Add(self.matcombo, 0, wx.ALL|wx.EXPAND, 3)
+        # secondlevelSizer.Add(self.unitcombo, 0, wx.ALL|wx.EXPAND, 3)
 
 
 
         thirdlevelSizer = wx.BoxSizer(wx.HORIZONTAL)
-        box = wx.BoxSizer(wx.VERTICAL)
-        t = wx.StaticText(self, label='Age')
         self.age_c = Ctrl(self, -1, autoformat='AGE', name="genOptions_agepopup_numctrl")
-        self.age_c.SetHint('Age')
-        
-        box.Add(t, 0, wx.ALL, 0)
-        box.Add(self.age_c, 0, wx.ALL, 0)
+        self.age_c.tableName = 'item_options'
+        self.age_c.fieldName = 'agepopup'
+        self.age_c.sqlfile = 'INVENTORY.sql'
+        tS = tSizer(self, text="Age", ctrl=self.age_c)
+        thirdlevelSizer.Add(tS, 0, wx.ALL|wx.EXPAND, 3)
 
-        thirdlevelSizer.Add(box, 0, wx.ALL|wx.EXPAND, 3)
         fourthlevelSizer = wx.BoxSizer(wx.HORIZONTAL)
         fifthlevelSizer = wx.BoxSizer(wx.HORIZONTAL)
         txt = wx.StaticText(self, -1, label="Units\nin Package")
-        ctrl = NumCtrl(self, -1, 
+        self.units_in_pkg_c = NumCtrl(self, -1, 
                              value=1, 
                              name='genOptions_units_in_package_numctrl',
                              min=1,
@@ -102,73 +108,86 @@ class MainOptionsTab(wx.Panel):
                              style=0, 
                              integerWidth=6,
                              fractionWidth=0)
-        # ctrl.tableName = 'item_options'
-        # ctrl.fieldName = 'unitsinpackage'       
-        ctrl.Bind(wx.EVT_KILL_FOCUS, self.NeverZero)
+        self.units_in_pkg_c.tableName = 'item_options'
+        self.units_in_pkg_c.fieldName = 'unitsinpackage'       
+        self.units_in_pkg_c.Bind(wx.EVT_KILL_FOCUS, self.NeverZero)
         
-        fifthlevelSizer.Add(ctrl, 0, wx.ALL|wx.EXPAND, 5)
+        fifthlevelSizer.Add(self.units_in_pkg_c, 0, wx.ALL|wx.EXPAND, 5)
         fifthlevelSizer.Add(txt, 0, wx.ALL|wx.EXPAND, 5)
 
-        flc_list = [('Food Stamp Exempt','genOptions_foodStampExempt_checkbox','foodstampexempt'),
-                    ('Loyalty Exempt','genOptions_loyaltyExempt_checkbox','loyaltyexempt'),
-                    ('Consignment','genOptions_consignment_checkbox','consignment'),
-                    ('Closeout','genOptions_closeout_checkbox','closeout')]
+        # flc_list = [('Food Stamp Exempt','genOptions_foodStampExempt_checkbox','foodstampexempt'),
+        #             ('Loyalty Exempt','genOptions_loyaltyExempt_checkbox','loyaltyexempt'),
+        #             ('Consignment','genOptions_consignment_checkbox','consignment'),
+        #             ('Closeout','genOptions_closeout_checkbox','closeout')]
         
         self.foodstampcb = RH_CheckBox(self, label='Food Stamp Exempt')
         self.foodstampcb.tableName = 'item_options'
         self.foodstampcb.fieldName = 'foodstampexempt'
+        self.foodstampcb.sqlfile = 'INVENTORY.sql'
+        fifthlevelSizer.Add(self.foodstampcb, 0, wx.ALL ,5)
+        
         self.loyaltycb = RH_CheckBox(self, label='Loyalty Exempt')
         self.loyaltycb.tableName = 'item_options'
         self.loyaltycb.fieldName = 'loyaltyexempt'
+        self.loyaltycb.sqlfile = 'INVENTORY.sql'
+        fifthlevelSizer.Add(self.loyaltycb, 0, wx.ALL, 5)
+        
         self.consigncb = RH_CheckBox(self, label='Consignment')
         self.consigncb.tableName = 'item_options'
         self.consigncb.fieldName = 'consignment'
+        self.consigncb.sqlfile = 'INVENTORY.sql'
+        fifthlevelSizer.Add(self.consigncb, 0, wx.ALL, 5)
+        
         self.closeoutcb = RH_CheckBox(self, label='Closeout')
         self.closeoutcb.tableName = 'item_options'
         self.closeoutcb.fieldName = 'closeout'
-
-        fifthlevelSizer.Add(self.foodstampcb, 0, wx.ALL ,5)
-        fifthlevelSizer.Add(self.loyaltycb, 0, wx.ALL, 5)
-        fifthlevelSizer.Add(self.consigncb, 0, wx.ALL, 5)
+        self.closeoutcb.sqlfile = 'INVENTORY.sql'
         fifthlevelSizer.Add(self.closeoutcb, 0, wx.ALL, 5)
-        sixthlevelSizer = wx.BoxSizer(wx.HORIZONTAL)
 
+        sixthlevelSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.partnumtc = RH_TextCtrl(self, size=(140, -1))
-        self.partnumtc.SetHint('Part #')
         self.partnumtc.tableName = 'item_detailed'
         self.partnumtc.fieldName = 'part_num'
+        self.partnumtc.sqlfile = 'INVENTORY.sql'
+        tS = tSizer(self, text="Part #", ctrl=self.partnumtc)
+        sixthlevelSizer.Add(tS, 0, wx.ALL, 5)
+
         self.oemnumtc = RH_TextCtrl(self, size=(140, -1))
-        self.oemnumtc.SetHint('OEM #')
         self.oemnumtc.tableName = 'item_detailed'        
         self.oemnumtc.fieldName = 'oempart_num'
+        self.oemnumtc.sqlfile = 'INVENTORY.sql'
+        tS = tSizer(self, text="OEM #", ctrl=self.oemnumtc)
+        sixthlevelSizer.Add(tS, 0, wx.ALL, 5)
+        
         self.zonenumtc = RH_TextCtrl(self, size=(140, -1))
-        self.zonenumtc.SetHint('Zone')
         self.zonenumtc.tableName = 'item_options'
         self.zonenumtc.fieldName = 'location'
-
-        sixthlevelSizer.Add(self.partnumtc, 0, wx.ALL, 5)
-        sixthlevelSizer.Add(self.oemnumtc, 0, wx.ALL, 5)
-        sixthlevelSizer.Add(self.zonenumtc, 0, wx.ALL, 5)
+        self.zonenumtc.sqlfile = 'INVENTORY.sql'
+        tS = tSizer(self, text="Zone", ctrl=self.zonenumtc)
+        sixthlevelSizer.Add(tS, 0, wx.ALL, 5)
 
         lvl6b_Sizer = wx.BoxSizer(wx.HORIZONTAL)
         
         self.kitnumtc = RH_TextCtrl(self, size=(140, -1))
-        self.kitnumtc.SetHint('Kit #')
         self.kitnumtc.tableName = 'item_detailed'
         self.kitnumtc.fieldName = 'kit_num'
+        self.kitnumtc.sqlfile = 'INVENTORY.sql'
+        tS = tSizer(self, text="Kit #", ctrl=self.kitnumtc)
+        lvl6b_Sizer.Add(tS, 0, wx.ALL, 5)
+        
         self.piecestc = RH_TextCtrl(self, size=(140, -1))
-        self.piecestc.SetHint('Kit Pieces')
         self.piecestc.tableName = 'item_detailed'
         self.piecestc.fieldName = 'kit_pieces'
-
-        lvl6b_Sizer.Add(self.kitnumtc, 0, wx.ALL, 5)
-        lvl6b_Sizer.Add(self.piecestc, 0, wx.ALL, 5)
+        self.piecestc.sqlfile = 'INVENTORY.sql'
+        tS = tSizer(self, text="Kit Pieces", ctrl=self.piecestc)
+        lvl6b_Sizer.Add(tS, 0, wx.ALL, 5)
 
         seventhlevelSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.deactivatedcb = RH_CheckBox(self, label="Deactivated")
         self.deactivatedcb.SetForegroundColour('Red')
         self.deactivatedcb.tableName = 'item_options'
         self.deactivatedcb.fieldName = 'deactivated'
+        self.deactivatedcb.sqlfile = 'INVENTORY.sql'
         seventhlevelSizer.Add(self.deactivatedcb, 0, wx.ALL, 5)
 
         numberofitemstxt = wx.StaticText(self, -1, 
@@ -245,9 +264,9 @@ class MainOptionsTab(wx.Panel):
                         ('location', self.matcombo),
                         ('unittype', self.unitcombo)]
 
-        for field, item in DeptCat_list:
+        #for field, item in DeptCat_list:
         
-            item.LoadDefaults('organizations', field, 'abuser', 'rhp')
+       #     item.LoadDefaults('organizations', field, 'abuser', 'rhp')
             
 
     def OnSave(self):
