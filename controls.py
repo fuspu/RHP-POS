@@ -624,21 +624,23 @@ class IconList(object):
 
     def getIcon(self, icon_name):
         return self.a_dict[icon_name]
-
-
-class RH_Icon(wx.Button, IconList):
-    def __init__(self, *args, **kwargs):
+        
+class RH_Icon(wx.Button):
+    def __init__(self, parent, *args, **kwargs):
         typd = kwargs.pop('label')
         size = kwargs.pop('fontsize')
-        wx.Button.__init__(parent, *args, **kwargs)
-        IconList.__init__(self, *args, **kwargs)
-        #icon = IconList()
-        self.SetFont(self.getFont(size=size))
-        self.SetLabel = self.getIcon(typd.lower())
+        super().__init__()
+        # wx.Button.__init__(parent, *args, **kwargs)
+        # IconList.__init__(parent, *args, **kwargs)
         
+        icon = IconList()
+        self.SetFont(icon.getFont(size=size))
+        self.SetLabel = icon.getIcon(typd.lower())
+
+
 class RH_Button(wx.Button):
     def __init__(self, *args, **kwargs):
-        wx.Button.__init__(parent, *args, **kwargs) 
+        wx.Button.__init__(*args, **kwargs) 
         self.icon = kwargs.pop('label')
         
         self.SetCtrl(self.icon)
