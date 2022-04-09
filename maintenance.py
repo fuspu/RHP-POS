@@ -11,7 +11,7 @@ import wx.lib.masked as masked
 from wx.lib.masked.textctrl import TextCtrl as MTextCtrl
 from wx.lib.masked import NumCtrl
 import wx.lib.agw.flatnotebook as fnb
-from controls import RH_OLV, RH_Button, RH_ListBox, GridOps, Themes, RH_Icon, LoadSaveList, IconList, RH_CheckBox, RH_TextCtrl, RH_FilePickerCtrl, RH_MTextCtrl
+from controls import RH_OLV, RH_Button, RH_ListBox, GridOps, Themes, RH_Icon, LoadSaveList, IconList, RH_CheckBox, RH_TextCtrl, RH_FilePickerCtrl, RH_MTextCtrl, RH_RadioBox
 from controls import tSizer, LoadSaveDict
 from dialogs import PasswordDialog
 from events import EventOps
@@ -73,14 +73,25 @@ class POSTab(wx.Panel):
         wx.Panel.__init__(self,parent=parent, id=wx.ID_ANY)
         self.SetName('Maintenance_POSTab')
 
+class TestTab(wx.Panel):
+    def __init__(self, parent, debug=False):
+        """Test Tab, maybe it'll work """
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+        MainSizer = wx.BoxSizer(wx.HORIZONTAL)
+        save = IconList().getIcon('save')
+        self.si = wx.Button(self, -1, label=save)
+        ts = tSizer(self, "Save Button", self.si)
+        MainSizer.Add(ts, 0 , wx.ALL, 5)
+        self.SetSizer(MainSizer)
+        self.Layout()
+
 
 class GeneralDetailsTab(wx.Panel):
-    def __init_(self, parent, size=(500,500), debug=False):
+    def __init__(self, parent, debug=False):
         """General Details Tab for the Inventory"""
-        super(GeneralDetailsTab, self).__init__()
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.SetName('MaintInvTab_GeneralDetailsTab')
-        self.LSL = HUD.LoadSaveList()
+        self.LSL = LoadSaveList()
         
         MainSizer = wx.BoxSizer(wx.HORIZONTAL)
         level1Sizer = wx.BoxSizer(wx.VERTICAL)
@@ -91,7 +102,7 @@ class GeneralDetailsTab(wx.Panel):
         save = icon.getIcon('save')
         self.si = wx.Button(self, -1, label=save, style=wx.BORDER_NONE)
         self.si.SetFont(icon.getFont(size=60))
-        self.si.Bind(wx.EVT_BUTTON, self.onSave)
+        self.si.Bind(wx.EVT_BUTTON, self.OnSave)
         level3Sizer.Add(self.si, 0, wx.ALL, 3)
 
         lbsize = (300, 100)
@@ -145,22 +156,23 @@ class GeneralDetailsTab(wx.Panel):
         self.aisleNums_nc = RH_MTextCtrl(self, -1, name=name, mask='#{4}')
         self.aisleNums_nc.tableName = 'organizations'
         self.aisleNums_nc.fieldName = 'num_of_aisles'
-        tS = tSizer(self, label='# of Aisles', ctrl=self.aisleNums_nc)
+        tS = tSizer(self, text='# of Aisles', ctrl=self.aisleNums_nc)
         self.LSL.Add(self.aisleNums_nc)
         level2Sizer.Add(tS, 0, wx.ALL, 3)
         
         name='invMaint_sectionNums_txtctrl'
-        self.sectionNums_nc = HUD.RH_MTextCtrl(self, -1, name=name, mask='#{4}')
+        self.sectionNums_nc = RH_MTextCtrl(self, -1, name=name, mask='#{4}')
         self.sectionNums_nc.tableName = 'organizations'
         self.sectionNums_nc.fieldName = 'num_of_sections'
         self.LSL.Add(self.sectionNums_nc)
-        tS = tSizer(self, label='# of Sections', ctrl=self.sectionNums_nc)
+        tS = tSizer(self, text='# of Sections', ctrl=self.sectionNums_nc)
         level2Sizer.Add(tS, 0, wx.ALL, 3)
         
         MainSizer.Add(level1Sizer, 0, wx.ALL, 3)
         MainSizer.Add(level2Sizer, 0, wx.ALL, 3)
         MainSizer.Add(level3Sizer, 0, wx.ALL, 3)
-        self.SetSizer(MainSizer, 0)
+        
+        self.SetSizer(MainSizer)
         self.Layout()
         
         #wx.CallAfter(self.OnLoad, event='')        
@@ -183,14 +195,15 @@ class GeneralDetailsTab(wx.Panel):
 
 
 class MarginTab(wx.Panel):
-    def __init_(self, parent, debug=False):
+    def __init__(self, parent, debug=False):
         """MarginGeneral Details Tab for the Inventory"""
+        super(MarginTab, self).__init__(parent)
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.SetName('MaintInvPricingTab_MarginTab')
         MainSizer = wx.BoxSizer(wx.VERTICAL)
         self.SetName('MarginTab')
         
-        self.rbox = HUD.RH_RadioBox(self, -1, 
+        self.rbox = RH_RadioBox(self, -1, 
                            choices=['General','By Cost','By Category'],
                            name='generalMargin_control_rbox', 
                            label='Figuring Initial Starting Margin')
@@ -198,17 +211,12 @@ class MarginTab(wx.Panel):
         self.rbox.fieldName = 'starting_margin_control'
         self.rbox.Bind(wx.EVT_RADIOBOX, self.onBoxChoice)
         
-        notebook = wx.Notebook(self, wx.ID_ANY,name='MarginTab_Notebook')
-        tabOne = GeneralMarginTab(notebook)
-        tabTwo = ByCostTab(notebook)
-        tabThree = ByCategoryTab(notebook)
-        
-        notebook.AddPage(tabOne, "General")
-        notebook.AddPage(tabTwo, "By Cost")
-        notebook.AddPage(tabThree, "By Category")
-        
+        self.nb = wx.Notebook(self, wx.ID_ANY,name='MarginTab_Notebook')
+        self.nb.AddPage(GeneralMarginTab(self.nb), "General")
+        self.nb.AddPage(ByCostTab(self.nb), "By Cost")
+        self.nb.AddPage(ByCategoryTab(self.nb), "By Category")
         MainSizer.Add(self.rbox, 0, wx.ALL|wx.ALIGN_CENTER, 5)
-        MainSizer.Add(notebook, 1, wx.ALL|wx.EXPAND, 5)
+        MainSizer.Add(self.nb, 1, wx.ALL|wx.EXPAND, 5)
         
         
         
@@ -218,26 +226,26 @@ class MarginTab(wx.Panel):
     def onBoxChoice(self, event):
         idxselection = self.rbox.GetSelection()
         selection = self.rbox.GetStringSelection()
-        notebook = wx.FindWindowByName('MarginTab_Notebook')
-        tabCount = notebook.GetPageCount()
-        notebook.SetSelection(idxselection)    
+        # notebook = wx.FindWindowByName('MarginTab_Notebook')
+        tabCount = self.nb.GetPageCount()
+        self.nb.SetSelection(idxselection)    
         #print("Radio Box CHoice : ",selection)
     
 
 class DiscountOptionsTab(wx.Panel):
-    def __init_(self, parent, debug=False):
+    def __init__(self, parent, debug=False):
         """Discount Options Tab for the Pricing Sections of the Inventory"""
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.SetName('MaintInvPricingTab_DiscOptionsTab')
 
 class CloseoutsTab(wx.Panel):
-    def __init_(self, parent, debug=False):
+    def __init__(self, parent, debug=False):
         """Closeouts Tab for the Pricing Sections of the Inventory"""
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.SetName('MaintInvPricingTab_CloseoutsTab')
 
 class PriceOptionsTab(wx.Panel):
-    def __init_(self, parent, debug=False):
+    def __init__(self, parent, debug=False):
         """Pricing Options Tab for the Inventory"""
         wx.Panel.__init__(self,parent=parent, id=wx.ID_ANY)
         self.SetName('Maintenance_PriceOptionsTab')
@@ -258,6 +266,7 @@ class InventoryMaintenanceTab(wx.Panel):
         nb = wx.Notebook(self, wx.ID_ANY, name='InvTab_Notebook', style=8)
         nb.AddPage(GeneralDetailsTab(nb), "General Details")
         nb.AddPage(PriceOptionsTab(nb), "Price Options")
+        nb.AddPage(TestTab(nb), "Testing Testing, 1..2..3..")
         nb.AddPage(MarginTab(nb), "Margin")
         nb.AddPage(DiscountOptionsTab(nb), "Discounts")
         nb.AddPage(CloseoutsTab(nb), "Closeouts")
@@ -282,7 +291,7 @@ class GeneralInfoTab(wx.Panel):
     def __init__(self, parent, debug=False):
         """ General Info Tab """    
         super(GeneralInfoTab, self).__init__(parent)
-        wx.Panel.__init__(self,parent=parent, id=wx.ID_ANY)
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.SetName('Maintenance_GeneralInfoTab')
         self.LSL = LoadSaveList()
 

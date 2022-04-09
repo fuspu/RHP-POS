@@ -2,7 +2,7 @@ import wx
 from ObjectListView import ObjectListView, ColumnDefn, OLVEvent
 import wx.grid as gridlib
 import pout
-from controls import RH_Button, RH_ListBox, RH_TextCtrl, GridOps, Themes
+from controls import RH_Button, RH_ListBox, RH_TextCtrl, GridOps, Themes, IconList
 from db_ops import LookupDB
 
 class PhoneNumber_Panel(wx.Panel):
@@ -15,7 +15,7 @@ class PhoneNumber_Panel(wx.Panel):
         wx.Panel.__init__(self, *args, **kwargs)
         
         MainSizer = wx.BoxSizer(wx.HORIZONTAL)
-        savebutton = HUD.RH_Icon(icon='save')
+        savebutton = RH_Icon(icon='save')
         savebutton.Bind(wx.EVT_BUTTON, self.OnSave)
 
         f_box = wx.StaticBox(self, -1, label="Phone Numbers")
@@ -35,7 +35,7 @@ class PhoneNumber_Panel(wx.Panel):
         
         f_add_boxSizer.Add(self.phonetc, 0, wx.ALL, 3)
 
-        ctrl = HUD.RH_Icon(icon='add')
+        ctrl = RH_Icon(icon='add')
         ctrl.Bind(wx.EVT_BUTTON, self.AddPhoneNumber)
         
         f_add_boxSizer.Add(ctrl, 0)
@@ -81,8 +81,11 @@ class AltLookup(wx.Panel):
         self.lbname = kwargs.pop('lbname')
         self.tableName = kwargs.pop('tableName')
         self.fieldName = kwargs.pop('fieldName')
+        self.loadAs = 'str'
+        self.saveAs = 'str'
         wx.Panel.__init__(self, *args, **kwargs)
         # pout.v(f'tableName : {self.tableName} ; fieldName : {self.fieldName}')
+        icon = IconList()
         box = wx.StaticBox(self, wx.ID_ANY, label=self.boxlabel)
         boxSizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
         
@@ -101,11 +104,16 @@ class AltLookup(wx.Panel):
         self.lbtc.Bind(wx.EVT_TEXT_ENTER, self.ListBoxOnAddButton)
         level1Col2Sizer.Add(self.lbtc, 0, wx.ALL, 3)
         
-        self.addbutton = RH_Button(self, -1, label="Add", size=(110,-1))
+        #self.addbutton = RH_Button(self, label="Add", size=30)
+        addicon = icon.getIcon('add')
+        self.addbutton = wx.Button(self, label=addicon, style=wx.BORDER_NONE)
+        self.addbutton.SetFont(icon.getFont(size=30))
         self.addbutton.Bind(wx.EVT_BUTTON, self.ListBoxOnAddButton)
         level1Col2Sizer.Add(self.addbutton, 0, wx.ALL, 3)
         
-        self.rembutton = RH_Button(self, -1, label="Remove", size=(110,-1))
+        remicon = icon.getIcon('delete')
+        self.rembutton = wx.Button(self, -1, label=remicon)
+        self.rembutton.SetFont(icon.getFont(size=30))
         self.rembutton.SetForegroundColour('Red')
         self.rembutton.Bind(wx.EVT_BUTTON, self.ListBoxOnRemoveButton)
         level1Col2Sizer.Add(self.rembutton, 0, wx.ALL, 3)
@@ -323,7 +331,7 @@ class TaxHoliday_Grid(gridlib.Grid):
         self.DeleteRows(row)
         self.AppendRows()
         
-        HUD.GridOps(named).GridAlternateColor('')
+        GridOps(named).GridAlternateColor('')
     
     def AddItem(self, item):
         newline = GridOps(self.GetName()).CurGridLine(blank=True)

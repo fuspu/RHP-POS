@@ -640,9 +640,9 @@ class RH_Icon(wx.Button):
 
 class RH_Button(wx.Button):
     def __init__(self, *args, **kwargs):
-        wx.Button.__init__(*args, **kwargs) 
         self.icon = kwargs.pop('label')
-        
+        self.fontsize = kwargs.pop('size')
+        wx.Button.__init__(*args, **kwargs) 
         self.SetCtrl(self.icon)
         self.listd = None
         self.tableName = None
