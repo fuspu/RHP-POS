@@ -73,18 +73,6 @@ class POSTab(wx.Panel):
         wx.Panel.__init__(self,parent=parent, id=wx.ID_ANY)
         self.SetName('Maintenance_POSTab')
 
-class TestTab(wx.Panel):
-    def __init__(self, parent, debug=False):
-        """Test Tab, maybe it'll work """
-        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
-        MainSizer = wx.BoxSizer(wx.HORIZONTAL)
-        save = IconList().getIcon('save')
-        self.si = wx.Button(self, -1, label=save)
-        ts = tSizer(self, "Save Button", self.si)
-        MainSizer.Add(ts, 0 , wx.ALL, 5)
-        self.SetSizer(MainSizer)
-        self.Layout()
-
 
 class GeneralDetailsTab(wx.Panel):
     def __init__(self, parent, debug=False):
@@ -111,16 +99,16 @@ class GeneralDetailsTab(wx.Panel):
         self.dept_lb = AltLookup(self, boxlabel='Departments', 
                                  lbsize=lbsize, 
                                  lbname=name, 
-                                 tableName='organizations', 
+                                 tableName='department', 
                                  fieldName='department')            
         self.LSL.Add(self.dept_lb)
         level1Sizer.Add(self.dept_lb, 0, wx.ALL, 3)
         
         name = 'invMaint_category_listbox'
-        self.cat_lb = AltLookup(self, boxlabel='Category', 
-                                 lbsize=lbsize, 
+        self.cat_lb = AltLookup(self, boxlabel='Category',
+                                 lbsize=lbsize,
                                  lbname=name,
-                                 tableName='organizations',
+                                 tableName='category',
                                  fieldName='category')
         self.LSL.Add(self.cat_lb)
         level1Sizer.Add(self.cat_lb, 0, wx.ALL, 3)
@@ -129,44 +117,53 @@ class GeneralDetailsTab(wx.Panel):
         self.subcat_lb = AltLookup(self, boxlabel='Sub-Category', 
                                  lbsize=lbsize, 
                                  lbname=name,
-                                 tableName='organizations',
+                                 tableName='subcategory',
                                  fieldName='subcategory')
         self.LSL.Add(self.subcat_lb)
         level1Sizer.Add(self.subcat_lb, 0, wx.ALL, 3)
 
-        name = 'invMaint_location_listbox'
-        self.locmat_lb = AltLookup(self, boxlabel='Location/Material', 
+        name = 'invMaint_material_listbox'
+        self.locmat_lb = AltLookup(self, boxlabel='Material', 
                                  lbsize=lbsize, 
                                  lbname=name,
-                                 tableName='organizations',
-                                 fieldName='location')
+                                 tableName='material',
+                                 fieldName='material')
         self.LSL.Add(self.locmat_lb)
         level1Sizer.Add(self.locmat_lb, 0, wx.ALL, 3)
+
+        name = 'invMaint_location_listbox'
+        self.locmat_lb = AltLookup(self, boxlabel='Location', 
+                                 lbsize=lbsize, 
+                                 lbname=name,
+                                 tableName='location',
+                                 fieldName='location')
+        self.LSL.Add(self.locmat_lb)
+        level2Sizer.Add(self.locmat_lb, 0, wx.ALL, 3)
 
         name = 'invMaint_unittype_listbox'
         self.unit_lb = AltLookup(self, boxlabel='Unit Type', 
                                  lbsize=lbsize, 
                                  lbname=name,
-                                 tableName='organizations',
+                                 tableName='unittype',
                                  fieldName='unittype')
         self.LSL.Add(self.unit_lb)
         level2Sizer.Add(self.unit_lb, 0, wx.ALL, 3)
 
-        name='invMaint_aisleNums_txtctrl'
-        self.aisleNums_nc = RH_MTextCtrl(self, -1, name=name, mask='#{4}')
-        self.aisleNums_nc.tableName = 'organizations'
-        self.aisleNums_nc.fieldName = 'num_of_aisles'
-        tS = tSizer(self, text='# of Aisles', ctrl=self.aisleNums_nc)
-        self.LSL.Add(self.aisleNums_nc)
-        level2Sizer.Add(tS, 0, wx.ALL, 3)
+        # name='invMaint_zone_txtctrl'
+        # self.aisleNums_nc = RH_MTextCtrl(self, -1, name=name, mask='#{4}')
+        # self.aisleNums_nc.tableName = 'zone'
+        # self.aisleNums_nc.fieldName = 'zone'
+        # tS = tSizer(self, text='Zone', ctrl=self.aisleNums_nc)
+        # self.LSL.Add(self.aisleNums_nc)
+        # level2Sizer.Add(tS, 0, wx.ALL, 3)
         
-        name='invMaint_sectionNums_txtctrl'
-        self.sectionNums_nc = RH_MTextCtrl(self, -1, name=name, mask='#{4}')
-        self.sectionNums_nc.tableName = 'organizations'
-        self.sectionNums_nc.fieldName = 'num_of_sections'
-        self.LSL.Add(self.sectionNums_nc)
-        tS = tSizer(self, text='# of Sections', ctrl=self.sectionNums_nc)
-        level2Sizer.Add(tS, 0, wx.ALL, 3)
+        # name='invMaint_sectionNums_txtctrl'
+        # self.sectionNums_nc = RH_MTextCtrl(self, -1, name=name, mask='#{4}')
+        # self.sectionNums_nc.tableName = 'organizations'
+        # self.sectionNums_nc.fieldName = 'num_of_sections'
+        # self.LSL.Add(self.sectionNums_nc)
+        # tS = tSizer(self, text='# of Sections', ctrl=self.sectionNums_nc)
+        # level2Sizer.Add(tS, 0, wx.ALL, 3)
         
         MainSizer.Add(level1Sizer, 0, wx.ALL, 3)
         MainSizer.Add(level2Sizer, 0, wx.ALL, 3)
@@ -175,29 +172,42 @@ class GeneralDetailsTab(wx.Panel):
         self.SetSizer(MainSizer)
         self.Layout()
         
-        #wx.CallAfter(self.OnLoad, event='')        
+        wx.CallAfter(self.OnLoad, event='')        
     
             
     def OnLoad(self, event):
-        for name in self.LSL.Get():
-            print(f'Name Load : {name}')
-            item = wx.FindWindowByName(name)
-            item.OnLoad(whereField='abuser', whereValue='rhp')
+        for item in self.LSL.Get():
+            #item = wx.FindWindowByName(name)
+            item.OnLoad('')
             
     def OnSave(self, event):
-        for name in self.LSL.Get():
-            print(f'Name Save : {name}')
-            item = wx.FindWindowByName(name)
-            item.OnSave(whereField='abuser', whereValue='rhp')
+        for item in self.LSL.Get():
+            #item = wx.FindWindowByName(name)
+            item.OnSave('')
 
 
+class ByCategoryTab(wx.Panel):
+    def __init__(self, parent, debug=False):
+        """Margin ByCategory Tab for the Inventory"""
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+        self.SetName('MaintInvPricingMarginTab_ByCategoryTab')
 
+class ByCostTab(wx.Panel):
+    def __init__(self, parent, debug=False):
+        """Margin ByCost Tab for the Inventory"""
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+        self.SetName('MaintInvPricingMarginTab_ByCostTab')
+
+class GeneralMarginTab(wx.Panel):
+    def __init__(self, parent, debug=False):
+        """MarginGeneral Details Tab for the Inventory"""
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+        self.SetName('MaintInvPricingMarginTab_GeneralMarginTab')
 
 
 class MarginTab(wx.Panel):
     def __init__(self, parent, debug=False):
         """MarginGeneral Details Tab for the Inventory"""
-        super(MarginTab, self).__init__(parent)
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.SetName('MaintInvPricingTab_MarginTab')
         MainSizer = wx.BoxSizer(wx.VERTICAL)
@@ -266,7 +276,6 @@ class InventoryMaintenanceTab(wx.Panel):
         nb = wx.Notebook(self, wx.ID_ANY, name='InvTab_Notebook', style=8)
         nb.AddPage(GeneralDetailsTab(nb), "General Details")
         nb.AddPage(PriceOptionsTab(nb), "Price Options")
-        nb.AddPage(TestTab(nb), "Testing Testing, 1..2..3..")
         nb.AddPage(MarginTab(nb), "Margin")
         nb.AddPage(DiscountOptionsTab(nb), "Discounts")
         nb.AddPage(CloseoutsTab(nb), "Closeouts")

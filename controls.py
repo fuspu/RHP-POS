@@ -481,14 +481,14 @@ class RH_LoadSaveListBox(object):
         
     def OnLoad(self, whereField, whereValue):
         returnd = LookupDB(self.tableName).Specific(whereValue, whereField, self.fieldName)
-        jsond = VarOps().CheckJson(returnd)
+        #jsond = VarOps().CheckJson(returnd)
         pout.v(f'RH_LoadSaveListBox : {jsond}')
         if jsond is not None:
             self.AppendItems(jsond)
         
     def OnSave(self, whereField, whereValue):
         a = self.GetSelection()        
-        b = VarOps().DoJson(a)
+        #b = VarOps().DoJson(a)
         try:
             returnd = LookupDB(self.tableName).UpdateSingle(self.fieldName, b, whereField, whereValue)
         except:
@@ -607,7 +607,8 @@ class IconList(object):
                        'receiving': '',
                        'pdf': '',
                        'logo': '_',
-                       'addrmaint': ''}
+                       'addrmaint': '',
+                       'minus': ''}
     
     def getFont(self, size=40):
         fontpath = './fonts/DaddyTimeMono Nerd Font Complete Mono.ttf'

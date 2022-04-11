@@ -422,175 +422,175 @@ if cnt == 0:
     conn.close()
 
 ######################## Support Tables ####################
-sql_file = './db/SUPPORT.sql'
-
-engine = create_engine(f'sqlite:///{sql_file}')
-meta = MetaData(engine)
-
-# Organizations
-table_name1  = 'organizations' 
-ts.add(sql_file, table_name1)
-
-t1 = Table(table_name1, meta, 
-          Column('abuser', String(10), primary_key=True),
-          Column('department', Text),
-          Column('category', Text), 
-          Column('subcategory', Text),
-          Column('material', Text),
-          Column('zone', Text),
-          Column('location', Text),
-          Column('unittype', Text),
-          Column('num_of_aisles', Integer, default=0),
-          Column('extra_places', Text),
-          Column('num_of_sections', Integer, default=0),
-          Column('customer_codes', Text),
-          Column('shipping_methods', Text),
-          Column('account_types', Text)
-)
-
-
-table_name2 = 'item_num_registry'
-ts.add(sql_file, table_name2)
-
-t2 = Table(table_name2, meta, 
-           Column('internal_num', String(30), primary_key=True),
-           Column('upc', String(30)))
-        
-
-meta.create_all()
-
-
-
-# Add Initial Items
-query = 'SELECT count(*) FROM {}'.format(table_name1)
-data = []
-cnt = SQConnect(query, data, sql_file=sql_file).ONE()[0]
-
-if cnt == 0:
-    conn = engine.connect()
-    depts = json.dumps(['HARDWARE', 'PLUMBING', 'ELECTRICAL', 'FASTENERS'])
-    cats = json.dumps(['TOOLS', 'PARTS', 'BOLTS', 'FIXTURES'])
-    subcats = json.dumps(['HAND', 'UNDERSINK', 'SAE', 'SAE'])
-    mats = json.dumps(['BRASS', 'STAINLESS', 'STEEL', 'ALUMINUM'])
-    zones = json.dumps(['PAINT1' ,'ELEC1', 'HDWE1', 'FASTENER1', 'PLBG1'])
-    units = json.dumps(['EA', 'RL', 'BX', 'EA'])
-    custcodes = json.dumps(['GOOD', 'BAD', 'HOSTILE'])
-    ships = json.dumps(['UPS', 'FEDEX', 'TRUCK', 'DRONE'])
-    accounttypes = json.dumps(['RESIDENTAL', 'COMMERCIAL', 'INDUSTRIAL', 'GOVT'])
-    vals = [{'abuser':'rhp', 'name':'Test Account', 'department':depts, 'category':cats, 'subcategory':subcats, 'material':mats, 'zone':zones, 'unittype':units, 'customer_codes':custcodes, 'shipping_methods':ships, 'account_types':accounttypes }]
-    conn.execute(t1.insert(), vals)    
-    conn.close()
-
-
-
-# ####################### Organization Tables ##################
 # sql_file = './db/SUPPORT.sql'
+
 # engine = create_engine(f'sqlite:///{sql_file}')
 # meta = MetaData(engine)
 
-# # Department
-# table_name1  = 'department' 
+# # Organizations
+# table_name1  = 'organizations' 
 # ts.add(sql_file, table_name1)
 
-# t1 = Table(table_name1, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('department', String(30)),
+# t1 = Table(table_name1, meta, 
+#           Column('abuser', String(10), primary_key=True),
+#           Column('department', Text),
+#           Column('category', Text), 
+#           Column('subcategory', Text),
+#           Column('material', Text),
+#           Column('zone', Text),
+#           Column('location', Text),
+#           Column('unittype', Text),
+#           Column('num_of_aisles', Integer, default=0),
+#           Column('extra_places', Text),
+#           Column('num_of_sections', Integer, default=0),
+#           Column('customer_codes', Text),
+#           Column('shipping_methods', Text),
+#           Column('account_types', Text)
 # )
 
-# # Category
-# table_name2  = 'category' 
+
+# table_name2 = 'item_num_registry'
 # ts.add(sql_file, table_name2)
 
-# t2 = Table(table_name2, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('category', String(30)),
-# )
-
-# # SubCategory
-# table_name3  = 'subcategory' 
-# ts.add(sql_file, table_name3)
-
-# t3 = Table(table_name3, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('subcategory', String(30)),
-# )
-
-# # Material
-# table_name4  = 'material' 
-# ts.add(sql_file, table_name4)
-
-# t4 = Table(table_name4, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('material', String(30)),
-# )
-
-# # Zones
-# table_name5  = 'zone' 
-# ts.add(sql_file, table_name5)
-
-# t3 = Table(table_name5, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('zone', String(30)),
-# )
-
-# # Location
-# table_name6  = 'location' 
-# ts.add(sql_file, table_name6)
-
-# t6 = Table(table_name6, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('location', String(30)),
-# )
-
-# # Unit Types
-# table_name7  = 'unittype' 
-# ts.add(sql_file, table_name7)
-
-# t7 = Table(table_name7, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('unittype', String(30)),
-# )
-
-# # Aisle Number
-# table_name8  = 'aisle_num' 
-# ts.add(sql_file, table_name8)
-
-# t8 = Table(table_name8, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('aisle_num', String(30)),
-# )
-
-# # Customer Codes
-# table_name9  = 'customer_codes' 
-# ts.add(sql_file, table_name9)
-
-# t9 = Table(table_name9, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('customer_code', String(30)),
-# )
-
-# # Shipping Methods
-# table_name10  = 'shipping_methods' 
-# ts.add(sql_file, table_name10)
-
-# t10 = Table(table_name10, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('shipping_method', String(30)),
-# )
-
-# # Account Types
-# table_name11  = 'account_types' 
-# ts.add(sql_file, table_name11)
-
-# t3 = Table(table_name11, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('account_type', String(30)),
-# )
-
-
-
+# t2 = Table(table_name2, meta, 
+#            Column('internal_num', String(30), primary_key=True),
+#            Column('upc', String(30)))
+        
 
 # meta.create_all()
+
+
+
+# # Add Initial Items
+# query = 'SELECT count(*) FROM {}'.format(table_name1)
+# data = []
+# cnt = SQConnect(query, data, sql_file=sql_file).ONE()[0]
+
+# if cnt == 0:
+#     conn = engine.connect()
+#     depts = json.dumps(['HARDWARE', 'PLUMBING', 'ELECTRICAL', 'FASTENERS'])
+#     cats = json.dumps(['TOOLS', 'PARTS', 'BOLTS', 'FIXTURES'])
+#     subcats = json.dumps(['HAND', 'UNDERSINK', 'SAE', 'SAE'])
+#     mats = json.dumps(['BRASS', 'STAINLESS', 'STEEL', 'ALUMINUM'])
+#     zones = json.dumps(['PAINT1' ,'ELEC1', 'HDWE1', 'FASTENER1', 'PLBG1'])
+#     units = json.dumps(['EA', 'RL', 'BX', 'EA'])
+#     custcodes = json.dumps(['GOOD', 'BAD', 'HOSTILE'])
+#     ships = json.dumps(['UPS', 'FEDEX', 'TRUCK', 'DRONE'])
+#     accounttypes = json.dumps(['RESIDENTAL', 'COMMERCIAL', 'INDUSTRIAL', 'GOVT'])
+#     vals = [{'abuser':'rhp', 'name':'Test Account', 'department':depts, 'category':cats, 'subcategory':subcats, 'material':mats, 'zone':zones, 'unittype':units, 'customer_codes':custcodes, 'shipping_methods':ships, 'account_types':accounttypes }]
+#     conn.execute(t1.insert(), vals)    
+#     conn.close()
+
+
+
+####################### Organization Tables ##################
+sql_file = './db/SUPPORT.sql'
+engine = create_engine(f'sqlite:///{sql_file}')
+meta = MetaData(engine)
+
+# Department
+table_name1  = 'department' 
+ts.add(sql_file, table_name1)
+
+t1 = Table(table_name1, meta,
+           Column('id', Integer, primary_key=True, autoincrement=True),
+           Column('department', String(30)),
+)
+
+# Category
+table_name2  = 'category' 
+ts.add(sql_file, table_name2)
+
+t2 = Table(table_name2, meta,
+           Column('id', Integer, primary_key=True, autoincrement=True),
+           Column('category', String(30)),
+)
+
+# SubCategory
+table_name3  = 'subcategory' 
+ts.add(sql_file, table_name3)
+
+t3 = Table(table_name3, meta,
+           Column('id', Integer, primary_key=True, autoincrement=True),
+           Column('subcategory', String(30)),
+)
+
+# Material
+table_name4  = 'material' 
+ts.add(sql_file, table_name4)
+
+t4 = Table(table_name4, meta,
+           Column('id', Integer, primary_key=True, autoincrement=True),
+           Column('material', String(30)),
+)
+
+# Zones
+table_name5  = 'zone' 
+ts.add(sql_file, table_name5)
+
+t3 = Table(table_name5, meta,
+           Column('id', Integer, primary_key=True, autoincrement=True),
+           Column('zone', String(30)),
+)
+
+# Location
+table_name6  = 'location' 
+ts.add(sql_file, table_name6)
+
+t6 = Table(table_name6, meta,
+           Column('id', Integer, primary_key=True, autoincrement=True),
+           Column('location', String(30)),
+)
+
+# Unit Types
+table_name7  = 'unittype' 
+ts.add(sql_file, table_name7)
+
+t7 = Table(table_name7, meta,
+           Column('id', Integer, primary_key=True, autoincrement=True),
+           Column('unittype', String(30)),
+)
+
+# Aisle Number
+table_name8  = 'aisle_num' 
+ts.add(sql_file, table_name8)
+
+t8 = Table(table_name8, meta,
+           Column('id', Integer, primary_key=True, autoincrement=True),
+           Column('aisle_num', String(30)),
+)
+
+# Customer Codes
+table_name9  = 'customer_codes' 
+ts.add(sql_file, table_name9)
+
+t9 = Table(table_name9, meta,
+           Column('id', Integer, primary_key=True, autoincrement=True),
+           Column('customer_code', String(30)),
+)
+
+# Shipping Methods
+table_name10  = 'shipping_methods' 
+ts.add(sql_file, table_name10)
+
+t10 = Table(table_name10, meta,
+           Column('id', Integer, primary_key=True, autoincrement=True),
+           Column('shipping_method', String(30)),
+)
+
+# Account Types
+table_name11  = 'account_types' 
+ts.add(sql_file, table_name11)
+
+t3 = Table(table_name11, meta,
+           Column('id', Integer, primary_key=True, autoincrement=True),
+           Column('account_type', String(30)),
+)
+
+
+
+
+meta.create_all()
 
 
 ############### Item Related Tables #########################

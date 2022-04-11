@@ -101,6 +101,8 @@ class AltLookup(wx.Panel):
         levelSizer.Add(self.lb, 0)
         
         self.lbtc = RH_TextCtrl(self, -1, size=(110, -1), style=wx.TE_PROCESS_ENTER)
+        self.lbtc.loadAs = 'str'
+        self.lbtc.saveAs = 'str'
         self.lbtc.Bind(wx.EVT_TEXT_ENTER, self.ListBoxOnAddButton)
         level1Col2Sizer.Add(self.lbtc, 0, wx.ALL, 3)
         
@@ -108,11 +110,12 @@ class AltLookup(wx.Panel):
         addicon = icon.getIcon('add')
         self.addbutton = wx.Button(self, label=addicon, style=wx.BORDER_NONE)
         self.addbutton.SetFont(icon.getFont(size=30))
+        self.addbutton.SetForegroundColour('Green')
         self.addbutton.Bind(wx.EVT_BUTTON, self.ListBoxOnAddButton)
         level1Col2Sizer.Add(self.addbutton, 0, wx.ALL, 3)
         
-        remicon = icon.getIcon('delete')
-        self.rembutton = wx.Button(self, -1, label=remicon)
+        remicon = icon.getIcon('minus')
+        self.rembutton = wx.Button(self, -1, label=remicon, style=wx.BORDER_NONE)
         self.rembutton.SetFont(icon.getFont(size=30))
         self.rembutton.SetForegroundColour('Red')
         self.rembutton.Bind(wx.EVT_BUTTON, self.ListBoxOnRemoveButton)
@@ -144,10 +147,10 @@ class AltLookup(wx.Panel):
         if has_found != -1:
             foundIndex = has_found
             self.lb.EnsureVisible(foundIndex)
-            self.addbutton.SetBackgroundColour('Red')
+            self.addbutton.SetForegroundColour('Red')
             self.TC_ClearFocus()
         else:
-            self.addbutton.SetBackgroundColour('Green')
+            self.addbutton.SetForegroundColour('Green')
             self.lb.Append(self.lbtc.GetValue().upper())
             self.TC_ClearFocus()
   
