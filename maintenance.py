@@ -99,7 +99,7 @@ class GeneralDetailsTab(wx.Panel):
         self.dept_lb = AltLookup(self, boxlabel='Departments', 
                                  lbsize=lbsize, 
                                  lbname=name, 
-                                 tableName='department', 
+                                 tableName='organizations', 
                                  fieldName='department')            
         self.LSL.Add(self.dept_lb)
         level1Sizer.Add(self.dept_lb, 0, wx.ALL, 3)
@@ -108,7 +108,7 @@ class GeneralDetailsTab(wx.Panel):
         self.cat_lb = AltLookup(self, boxlabel='Category',
                                  lbsize=lbsize,
                                  lbname=name,
-                                 tableName='category',
+                                 tableName='organizations',
                                  fieldName='category')
         self.LSL.Add(self.cat_lb)
         level1Sizer.Add(self.cat_lb, 0, wx.ALL, 3)
@@ -117,34 +117,43 @@ class GeneralDetailsTab(wx.Panel):
         self.subcat_lb = AltLookup(self, boxlabel='Sub-Category', 
                                  lbsize=lbsize, 
                                  lbname=name,
-                                 tableName='subcategory',
+                                 tableName='organizations',
                                  fieldName='subcategory')
         self.LSL.Add(self.subcat_lb)
         level1Sizer.Add(self.subcat_lb, 0, wx.ALL, 3)
 
         name = 'invMaint_material_listbox'
-        self.locmat_lb = AltLookup(self, boxlabel='Material', 
+        self.material_lb = AltLookup(self, boxlabel='Material', 
                                  lbsize=lbsize, 
                                  lbname=name,
-                                 tableName='material',
+                                 tableName='organizations',
                                  fieldName='material')
-        self.LSL.Add(self.locmat_lb)
-        level1Sizer.Add(self.locmat_lb, 0, wx.ALL, 3)
+        self.LSL.Add(self.material_lb)
+        level1Sizer.Add(self.material_lb, 0, wx.ALL, 3)
 
         name = 'invMaint_location_listbox'
-        self.locmat_lb = AltLookup(self, boxlabel='Location', 
+        self.location_lb = AltLookup(self, boxlabel='Location', 
                                  lbsize=lbsize, 
                                  lbname=name,
-                                 tableName='location',
+                                 tableName='organizations',
                                  fieldName='location')
-        self.LSL.Add(self.locmat_lb)
-        level2Sizer.Add(self.locmat_lb, 0, wx.ALL, 3)
+        self.LSL.Add(self.location_lb)
+        level2Sizer.Add(self.location_lb, 0, wx.ALL, 3)
+
+        name = 'invMaint_zone_listbox'
+        self.zone_lb = AltLookup(self, boxlabel='Zone', 
+                                 lbsize=lbsize, 
+                                 lbname=name,
+                                 tableName='organizations',
+                                 fieldName='zone')
+        self.LSL.Add(self.zone_lb)
+        level2Sizer.Add(self.zone_lb, 0, wx.ALL, 3)
 
         name = 'invMaint_unittype_listbox'
         self.unit_lb = AltLookup(self, boxlabel='Unit Type', 
                                  lbsize=lbsize, 
                                  lbname=name,
-                                 tableName='unittype',
+                                 tableName='organizations',
                                  fieldName='unittype')
         self.LSL.Add(self.unit_lb)
         level2Sizer.Add(self.unit_lb, 0, wx.ALL, 3)
@@ -176,14 +185,48 @@ class GeneralDetailsTab(wx.Panel):
     
             
     def OnLoad(self, event):
-        for item in self.LSL.Get():
-            #item = wx.FindWindowByName(name)
-            item.OnLoad('')
+        load_list = [(self.dept_lb, 'organizations', 'department'),
+                     (self.cat_lb, 'category', 'category'),
+                     (self.subcat_lb, 'subcategory', 'subcategory'),
+                     (self.material_lb, 'material', 'material'),
+                     (self.location_lb, 'location', 'location'),
+                     (self.zone_lb, 'zone', 'zone'),
+                     (self.unit_lb, 'unittype', 'unittype'),]
+        
+        for ctrl, tablename, fieldname in load_list:
+            ctrl.OnLoad('')
+            
+        # for item in self.LSL.Get():
+        #     #item = wx.FindWindowByName(name)
+        #     item.OnLoad('')
             
     def OnSave(self, event):
-        for item in self.LSL.Get():
-            #item = wx.FindWindowByName(name)
-            item.OnSave('')
+        save_list = [(self.dept_lb, 'department', 'department'),
+                     (self.cat_lb, 'category', 'category'),
+                     (self.subcat_lb, 'subcategory', 'subcategory'),
+                     (self.material_lb, 'material', 'material'),
+                     (self.location_lb, 'location', 'location'),
+                     (self.zone_lb, 'zone', 'zone'),
+                     (self.unit_lb, 'unittype', 'unittype'),]
+        
+        for ctrl, tablename, fieldname in save_list:
+            value = ctrl.GetItems()
+            val = json.dumps(value)
+            pout.v(value)
+            pout.v(val)
+            for i in value:
+                q = f'UPDATE organizations SET {fieldname}=? WHERE abuser=?'
+                d = (val, 'rhp',)
+                pout.v(q)
+                d = (i,)
+                pout.v(d)
+                r = SQConnect(q, d, './db/SUPPORT.sql').ONE()
+                pout.v(r)
+
+            
+        # for item in self.LSL.Get():
+        #     #item = wx.FindWindowByName(name)
+        #     item.OnSave('')
 
 
 class ByCategoryTab(wx.Panel):

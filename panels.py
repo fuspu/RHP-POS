@@ -136,6 +136,9 @@ class AltLookup(wx.Panel):
     def Clear(self, event):
         self.lb.Clear()
     
+    def GetItems(self):
+        return self.lb.GetItems()
+        
     def ListBoxOnAddButton(self, event):
         if not self.lbtc.GetValue():
             return

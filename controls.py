@@ -1,10 +1,34 @@
 import wx
 import re
+import pout
+import json
 import wx.lib.masked as masked
 from db_ops import SQConnect, LookupDB
 from decimal import Decimal, ROUND_HALF_UP
-import pout
 from ObjectListView import ObjectListView, ColumnDefn
+
+
+class VarOps(object):
+    def __init__(self):
+        pass
+
+
+    def CheckJson(self, jsond):
+        a = self.is_json(jsond)
+        if a is True:
+            return json.loads(jsond)
+        else:
+            return json
+
+    def is_json(self, myjson):
+        try:
+            json_object = json.loads(myjson)
+        except ValueError as e:
+            return False
+        except TypeError as e:
+            return False
+        
+        return True
 
 #---------------------------------------------------------------------------------------
 class LoadSaveList(object):
@@ -481,10 +505,17 @@ class RH_LoadSaveListBox(object):
         
     def OnLoad(self, whereField, whereValue):
         returnd = LookupDB(self.tableName).Specific(whereValue, whereField, self.fieldName)
-        #jsond = VarOps().CheckJson(returnd)
-        pout.v(f'RH_LoadSaveListBox : {jsond}')
-        if jsond is not None:
-            self.AppendItems(jsond)
+        pout.v(returnd[0])
+        jsond = VarOps().CheckJson(returnd[0])
+        pout.v(returnd)
+        pout.v(returnd[0])
+        j = json.loads(returnd)
+        
+        pout.v(f'RH_LoadSaveListBox : {j}')
+        
+        if jsond is not False:
+            self.AppendItems(j)
+
         
     def OnSave(self, whereField, whereValue):
         a = self.GetSelection()        
@@ -502,6 +533,10 @@ class RH_LoadSaveListBox(object):
 
     def Clear(self):
         self.Clear()
+    
+    def GetItems(self):
+        return [self.GetString(i) for i in range(listBox.GetCount())]
+    
 
 #--------------------------------------------------------------------------
 class RH_LoadSaveListCtrl(object):
