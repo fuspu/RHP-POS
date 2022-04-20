@@ -185,13 +185,13 @@ class GeneralDetailsTab(wx.Panel):
     
             
     def OnLoad(self, event):
-        load_list = [(self.dept_lb, 'organizations', 'department'),
-                     (self.cat_lb, 'category', 'category'),
-                     (self.subcat_lb, 'subcategory', 'subcategory'),
-                     (self.material_lb, 'material', 'material'),
-                     (self.location_lb, 'location', 'location'),
-                     (self.zone_lb, 'zone', 'zone'),
-                     (self.unit_lb, 'unittype', 'unittype'),]
+        load_list = [(self.dept_lb, 'organizations', 'id'),
+                     (self.cat_lb, 'category', 'id'),
+                     (self.subcat_lb, 'subcategory', 'id'),
+                     (self.material_lb, 'material', 'id'),
+                     (self.location_lb, 'location', 'id'),
+                     (self.zone_lb, 'zone', 'id'),
+                     (self.unit_lb, 'unittype', 'id'),]
         
         for ctrl, tablename, fieldname in load_list:
             ctrl.OnLoad('')

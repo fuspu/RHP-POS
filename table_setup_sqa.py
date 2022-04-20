@@ -422,42 +422,42 @@ if cnt == 0:
     conn.close()
 
 ######################## Support Tables ####################
-sql_file = './db/SUPPORT.sql'
+# sql_file = './db/SUPPORT.sql'
 
-engine = create_engine(f'sqlite:///{sql_file}')
-meta = MetaData(engine)
+# engine = create_engine(f'sqlite:///{sql_file}')
+# meta = MetaData(engine)
 
-# Organizations
-table_name1  = 'organizations' 
-ts.add(sql_file, table_name1)
+# # Organizations
+# table_name1  = 'organizations' 
+# ts.add(sql_file, table_name1)
 
-t1 = Table(table_name1, meta, 
-          Column('abuser', String(10), primary_key=True),
-          Column('department', Text),
-          Column('category', Text), 
-          Column('subcategory', Text),
-          Column('material', Text),
-          Column('zone', Text),
-          Column('location', Text),
-          Column('unittype', Text),
-          Column('num_of_aisles', Integer, default=0),
-          Column('extra_places', Text),
-          Column('num_of_sections', Integer, default=0),
-          Column('customer_codes', Text),
-          Column('shipping_methods', Text),
-          Column('account_types', Text)
-)
+# t1 = Table(table_name1, meta, 
+#           Column('abuser', String(10), primary_key=True),
+#           Column('department', Text),
+#           Column('category', Text), 
+#           Column('subcategory', Text),
+#           Column('material', Text),
+#           Column('zone', Text),
+#           Column('location', Text),
+#           Column('unittype', Text),
+#           Column('num_of_aisles', Integer, default=0),
+#           Column('extra_places', Text),
+#           Column('num_of_sections', Integer, default=0),
+#           Column('customer_codes', Text),
+#           Column('shipping_methods', Text),
+#           Column('account_types', Text)
+# )
 
 
-table_name2 = 'item_num_registry'
-ts.add(sql_file, table_name2)
+# table_name2 = 'item_num_registry'
+# ts.add(sql_file, table_name2)
 
-t2 = Table(table_name2, meta, 
-           Column('internal_num', String(30), primary_key=True),
-           Column('upc', String(30)))
+# t2 = Table(table_name2, meta, 
+#            Column('internal_num', String(30), primary_key=True),
+#            Column('upc', String(30)))
         
 
-meta.create_all()
+# meta.create_all()
 
 
 
@@ -484,113 +484,103 @@ meta.create_all()
 
 
 ####################### Organization Tables ##################
-# sql_file = './db/SUPPORT.sql'
-# engine = create_engine(f'sqlite:///{sql_file}')
-# meta = MetaData(engine)
+sql_file = './db/SUPPORT.sql'
+engine = create_engine(f'sqlite:///{sql_file}')
+meta = MetaData(engine)
 
-# # Department
-# table_name1  = 'department' 
-# ts.add(sql_file, table_name1)
+# Department
+table_name1  = 'department' 
+ts.add(sql_file, table_name1)
 
-# t1 = Table(table_name1, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('department', String(30)),
-# )
+t1 = Table(table_name1, meta,
+           Column('id', String(30), primary_key=True)
+)
+           
 
-# # Category
-# table_name2  = 'category' 
-# ts.add(sql_file, table_name2)
+# Category
+table_name2  = 'category' 
+ts.add(sql_file, table_name2)
 
-# t2 = Table(table_name2, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('category', String(30)),
-# )
+t2 = Table(table_name2, meta,
+           Column('id', String(30), primary_key=True)
+)
 
-# # SubCategory
-# table_name3  = 'subcategory' 
-# ts.add(sql_file, table_name3)
+# SubCategory
+table_name3  = 'subcategory' 
+ts.add(sql_file, table_name3)
 
-# t3 = Table(table_name3, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('subcategory', String(30)),
-# )
+t3 = Table(table_name3, meta,
+           Column('id', String(30), primary_key=True)
+)
 
-# # Material
-# table_name4  = 'material' 
-# ts.add(sql_file, table_name4)
+# Material
+table_name4  = 'material' 
+ts.add(sql_file, table_name4)
 
-# t4 = Table(table_name4, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('material', String(30)),
-# )
+t4 = Table(table_name4, meta,
+           Column('id', String(30), primary_key=True)
+)
 
-# # Zones
-# table_name5  = 'zone' 
-# ts.add(sql_file, table_name5)
+# Zones
+table_name5  = 'zone' 
+ts.add(sql_file, table_name5)
 
-# t3 = Table(table_name5, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('zone', String(30)),
-# )
+t3 = Table(table_name5, meta,
+           Column('id', String(30), primary_key=True)
+)
 
-# # Location
-# table_name6  = 'location' 
-# ts.add(sql_file, table_name6)
+# Location
+table_name6  = 'location' 
+ts.add(sql_file, table_name6)
 
-# t6 = Table(table_name6, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('location', String(30)),
-# )
+t6 = Table(table_name6, meta,
+           Column('id', String(30), primary_key=True)
+)
 
-# # Unit Types
-# table_name7  = 'unittype' 
-# ts.add(sql_file, table_name7)
+# Unit Types
+table_name7  = 'unittype' 
+ts.add(sql_file, table_name7)
 
-# t7 = Table(table_name7, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('unittype', String(30)),
-# )
+t7 = Table(table_name7, meta,
+           Column('id', String(30), primary_key=True)           
+)
 
-# # Aisle Number
-# table_name8  = 'aisle_num' 
-# ts.add(sql_file, table_name8)
+# Aisle Number
+table_name8  = 'aisle_num' 
+ts.add(sql_file, table_name8)
 
-# t8 = Table(table_name8, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('aisle_num', String(30)),
-# )
+t8 = Table(table_name8, meta,
+           Column('id', String(30), primary_key=True)
+)
 
-# # Customer Codes
-# table_name9  = 'customer_codes' 
-# ts.add(sql_file, table_name9)
+# Customer Codes
+table_name9  = 'customer_codes' 
+ts.add(sql_file, table_name9)
 
-# t9 = Table(table_name9, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('customer_code', String(30)),
-# )
+t9 = Table(table_name9, meta,
+           Column('id', String(30), primary_key=True)
+           )
 
-# # Shipping Methods
-# table_name10  = 'shipping_methods' 
-# ts.add(sql_file, table_name10)
+# Shipping Methods
+table_name10  = 'shipping_methods' 
+ts.add(sql_file, table_name10)
 
-# t10 = Table(table_name10, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('shipping_method', String(30)),
-# )
+t10 = Table(table_name10, meta,
+           Column('id', String(30), primary_key=True)
+           )
 
-# # Account Types
-# table_name11  = 'account_types' 
-# ts.add(sql_file, table_name11)
+# Account Types
+table_name11  = 'account_types' 
+ts.add(sql_file, table_name11)
 
-# t3 = Table(table_name11, meta,
-#            Column('id', Integer, primary_key=True, autoincrement=True),
-#            Column('account_type', String(30)),
-# )
+t3 = Table(table_name11, meta,
+           Column('id', String(30), primary_key=True)
+           )
 
 
 
 
-# meta.create_all()
+meta.create_all()
 
 
 ############### Item Related Tables #########################
