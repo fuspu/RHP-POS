@@ -127,6 +127,9 @@ class AltLookup(wx.Panel):
         self.SetSizer(boxSizer)
         self.Layout()
 
+    def SetItems(self, items):
+        self.lb.SetItems(items)
+        
     def OnLoad(self, event):
         self.lb.OnLoad(whereField='abuser', whereValue='rhp')
 

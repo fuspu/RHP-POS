@@ -76,7 +76,7 @@ class LoadSaveList(object):
                 
                 sqlfile = lsl[tableName][tuple_of_fields[0]]['sqlfile']
 
-                pout.v(sqlfile)
+                # pout.v(sqlfile)
                 return q, d, sqlfile
 
     def UpdateQD(self, tuple_of_fields, where=None):
@@ -98,7 +98,7 @@ class LoadSaveList(object):
                     q = f'UPDATE {tableName} SET {update_fields} WHERE {where}=?'
                     d = vald
                     sqlfile = lsl[tableName][tuple_of_fields[0]]['sqlfile']
-                    print(q, d, sqlfile)
+                    # print(q, d, sqlfile)
                     return q, d, sqlfile
 
 
@@ -386,7 +386,7 @@ class RH_LoadSaveString(object):
         if typd == 'save':
             conv = self.saveAs
 
-        pout.v(value, self.loadAs)
+        pout.v('CheckSaveLoadAs : ', value, self.loadAs)
 
         if 'str' in conv:
             value = str(value)

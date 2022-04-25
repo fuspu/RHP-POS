@@ -17,7 +17,7 @@ from dialogs import PasswordDialog
 from events import EventOps
 from decimal import Decimal, ROUND_HALF_UP
 import wx.lib.inspection
-from db_ops import SQConnect, QueryOps, LookupDB, GetSQLFile
+from db_ops import SQConnect, QueryOps, LookupDB, GetSQLFile, DBConnect, Detupler
 from panels import AltLookup, Tax_Table_Grid
 from utils import IconPanel
 
@@ -80,7 +80,8 @@ class GeneralDetailsTab(wx.Panel):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.SetName('MaintInvTab_GeneralDetailsTab')
         self.LSL = LoadSaveList()
-        
+        self.sqlfile = './db/SUPPORT.sql'
+
         MainSizer = wx.BoxSizer(wx.HORIZONTAL)
         level1Sizer = wx.BoxSizer(wx.VERTICAL)
         level2Sizer = wx.BoxSizer(wx.VERTICAL)
@@ -158,22 +159,6 @@ class GeneralDetailsTab(wx.Panel):
         self.LSL.Add(self.unit_lb)
         level2Sizer.Add(self.unit_lb, 0, wx.ALL, 3)
 
-        # name='invMaint_zone_txtctrl'
-        # self.aisleNums_nc = RH_MTextCtrl(self, -1, name=name, mask='#{4}')
-        # self.aisleNums_nc.tableName = 'zone'
-        # self.aisleNums_nc.fieldName = 'zone'
-        # tS = tSizer(self, text='Zone', ctrl=self.aisleNums_nc)
-        # self.LSL.Add(self.aisleNums_nc)
-        # level2Sizer.Add(tS, 0, wx.ALL, 3)
-        
-        # name='invMaint_sectionNums_txtctrl'
-        # self.sectionNums_nc = RH_MTextCtrl(self, -1, name=name, mask='#{4}')
-        # self.sectionNums_nc.tableName = 'organizations'
-        # self.sectionNums_nc.fieldName = 'num_of_sections'
-        # self.LSL.Add(self.sectionNums_nc)
-        # tS = tSizer(self, text='# of Sections', ctrl=self.sectionNums_nc)
-        # level2Sizer.Add(tS, 0, wx.ALL, 3)
-        
         MainSizer.Add(level1Sizer, 0, wx.ALL, 3)
         MainSizer.Add(level2Sizer, 0, wx.ALL, 3)
         MainSizer.Add(level3Sizer, 0, wx.ALL, 3)
@@ -185,7 +170,7 @@ class GeneralDetailsTab(wx.Panel):
     
             
     def OnLoad(self, event):
-        load_list = [(self.dept_lb, 'organizations', 'id'),
+        load_list = [(self.dept_lb, 'department', 'id'),
                      (self.cat_lb, 'category', 'id'),
                      (self.subcat_lb, 'subcategory', 'id'),
                      (self.material_lb, 'material', 'id'),
@@ -194,11 +179,14 @@ class GeneralDetailsTab(wx.Panel):
                      (self.unit_lb, 'unittype', 'id'),]
         
         for ctrl, tablename, fieldname in load_list:
-            ctrl.OnLoad('')
-            
-        # for item in self.LSL.Get():
-        #     #item = wx.FindWindowByName(name)
-        #     item.OnLoad('')
+            q = f'SELECT id FROM {tablename}'
+            d = ()
+            r = SQConnect(q, d, self.sqlfile).ALL()
+
+            if len(r) > 0:
+                a = Detupler(r).ListIt()
+                ctrl.SetItems(a)
+
             
     def OnSave(self, event):
         save_list = [(self.dept_lb, 'department', 'department'),
@@ -211,18 +199,13 @@ class GeneralDetailsTab(wx.Panel):
         
         for ctrl, tablename, fieldname in save_list:
             value = ctrl.GetItems()
-            val = json.dumps(value)
-            pout.v(value)
-            pout.v(val)
             for i in value:
-                q = f'UPDATE organizations SET {fieldname}=? WHERE abuser=?'
-                d = (val, 'rhp',)
-                pout.v(q)
-                d = (i,)
-                pout.v(d)
-                r = SQConnect(q, d, './db/SUPPORT.sql').ONE()
-                pout.v(r)
-
+                try:
+                    q = f'INSERT INTO {tablename} VALUES (?);'
+                    d = (i,)
+                    r = DBConnect(q, d, self.sqlfile).ONE()
+                except sqlite3.Error as error:
+                    print('delt', error)    
             
         # for item in self.LSL.Get():
         #     #item = wx.FindWindowByName(name)
@@ -241,6 +224,13 @@ class ByCostTab(wx.Panel):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.SetName('MaintInvPricingMarginTab_ByCostTab')
 
+class ByVendorTab(wx.Panel):
+    def __init__(self, parent, debug=False):
+        """Margin ByVendor Tab for the Inventory"""
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
+        self.SetName('MaintInvPricingMarginTab_ByVendorTab')
+
+
 class GeneralMarginTab(wx.Panel):
     def __init__(self, parent, debug=False):
         """MarginGeneral Details Tab for the Inventory"""
@@ -257,7 +247,7 @@ class MarginTab(wx.Panel):
         self.SetName('MarginTab')
         
         self.rbox = RH_RadioBox(self, -1, 
-                           choices=['General','By Cost','By Category'],
+                           choices=['General','By Cost','By Category', 'By Vendor'],
                            name='generalMargin_control_rbox', 
                            label='Figuring Initial Starting Margin')
         self.rbox.tableName = 'item_margin'
@@ -268,6 +258,7 @@ class MarginTab(wx.Panel):
         self.nb.AddPage(GeneralMarginTab(self.nb), "General")
         self.nb.AddPage(ByCostTab(self.nb), "By Cost")
         self.nb.AddPage(ByCategoryTab(self.nb), "By Category")
+        self.nb.AddPage(ByVendorTab(self.nb), "By Vendor")
         MainSizer.Add(self.rbox, 0, wx.ALL|wx.ALIGN_CENTER, 5)
         MainSizer.Add(self.nb, 1, wx.ALL|wx.EXPAND, 5)
         
@@ -302,8 +293,198 @@ class PriceOptionsTab(wx.Panel):
         """Pricing Options Tab for the Inventory"""
         wx.Panel.__init__(self,parent=parent, id=wx.ID_ANY)
         self.SetName('Maintenance_PriceOptionsTab')
+        MainSizer = wx.BoxSizer(wx.HORIZONTAL)
         
-       
+        listboxes = [('Price Schemes','invMaint_priceSchemes_listbox')]
+        colLabel_list = [('Name',120),('Scheme',90),('Reduce By',75)]
+        self.priceSchemes_lc = RH_OLV(self,size=(300,260), name='invMaint_priceSchemes_listctrl', style=wx.LC_REPORT|wx.BORDER_SIMPLE)      
+        self.priceSchemes_lc.SetColumns([
+                            ColumnDefn('Name','left',120,'named'),
+                            ColumnDefn('Scheme','center',90,'schemed'),
+                            ColumnDefn('Reduce By','center',75,'reduced')
+                            ])
+
+        self.priceSchemes_lc.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onItemSelect)
+        idx = 0
+        
+        explanation = 'Enter a Scheme i.e. \'1-3-10\' According to Starting Margin & Reduced_By will \nset each additional unit qty less by reduced_by percentage separated by \'-\' dashes\n Also \'1-PK-2X\' will result in \'1 & box qty & box qty * 2\''              
+        text = wx.StaticText(self, -1, label=explanation)
+        
+        editSizer = wx.BoxSizer(wx.HORIZONTAL)
+        edit_list = [('Name','invMaint_priceSchemes_listctrl_name_txtctrl'),
+                     #('Schemed','invMaint_priceSchemes_listctrl_scheme_txtctrl'),
+                     #('Reduce By','invMaint_priceSchemes_listctrl_reduceby_numctrl'),
+                     ('Qty','invMaint_priceSchemes_qty1_txtctrl'),
+                     ('Operator','invMaint_priceSchemes_opt1_combobox'),
+                     ('Margin', 'invMaint_priceSchemes_margin1_txtctrl'),
+                     ('Qty','invMaint_priceSchemes_qty2_txtctrl'),
+                     ('Operator','invMaint_priceSchemes_opt2_combobox'),
+                     ('Margin', 'invMaint_priceSchemes_margin2_txtctrl'),
+                     ('Qty','invMaint_priceSchemes_qty3_txtctrl'),
+                     ('Operator','invMaint_priceSchemes_opt3_combobox'),
+                     ('Margin', 'invMaint_priceSchemes_margin3_txtctrl'),
+                     ('Qty','invMaint_priceSchemes_qty4_txtctrl'),
+                     ('Operator','invMaint_priceSchemes_opt4_combobox'),
+                     ('Margin', 'invMaint_priceSchemes_margin4_txtctrl'),
+                     ('Add','invMaint_priceSchemes_listctrl_add_button'),
+                     ('Delete','invMaint_priceSchemes_listctrl_delete_button'),
+                     ('Clear','invMaint_priceSchemes_listctrl_clear_button')]
+
+        name = 'invMaint_priceSchemes_listctrl_name_texctrl'
+        self.name_tc = RH_TextCtrl(self, -1, name=name)             
+        self.name_tc.SetToolTip(wx.ToolTip('Enter a Percentage of Margin you wish to Reduce the initial margin by'))
+        self.name_tc.Bind(wx.EVT_KILL_FOCUS, EventOps().Capitals)
+        editSizer.Add(self.name_tc, 0)
+
+        name = 'invMaint_priceSchemes_qty1_textctrl'
+        self.qty1_tc = RH_TextCtrl(self, -1, name=name)
+        editSizer.Add(self.qty1_tc, 0)
+
+        name = 'invMaint_priceSchemes_opt1_combobox'
+        self.opt1_cbox = RH_ComboBox(self, -1, choices=[], name=name)
+        editSizer.Add(self.opt1_cbox)
+        
+        name = 'invMaint_priceSchemes_margin1_textctrl'
+        icon = IconList()
+        for label, name in edit_list:
+            box = wx.StaticBox(self, label=label)
+            boxSizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
+            if '_reduceby_' in name:
+                ctrl = RH_TextCtrl(self, -1, name=name)
+                ctrl.SetToolTip(wx.ToolTip('Enter a Percentage of Margin you wish to Reduce the initial margin by'))
+                
+            if '_name_' in name:
+                ctrl = RH_MTextCtrl(self, -1, name=name, mask='XXXXXXXXX')
+                ctrl.SetToolTip(wx.ToolTip('Enter a Name for the Scheme within 9 characters'))
+                ctrl.Bind(wx.EVT_KILL_FOCUS, EventOps().Capitals)
+                
+            if '_scheme_' in name:
+                ctrl = RH_TextCtrl(self, -1, name=name)
+                ctrl.Bind(wx.EVT_KILL_FOCUS, EventOps().Capitals)
+                #ctrl.SetToolTip(wx.ToolTip('Enter a Scheme i.e. \'1-3-10\' According to Starting Margin & Reduced_By will \nset each additional unit qty less by reduced_by percentage separated by \'-\' dashes\n Also \'1-PK-2X\' will result in \'1 & box qty & box qty * 2\''))     
+            
+            if 'button' in name:
+                save = icon.getIcon(label.lower())
+                self.si = wx.Button(self, -1, label=save, style=wx.BORDER_NONE)
+                self.si.SetFont(icon.getFont(size=60))
+                self.si.Bind(wx.EVT_BUTTON, self.onButton)
+        
+                # ctrl = RH_Button(self, label=label, name=name, size=(20))
+                # ctrl.Bind(wx.EVT_BUTTON, self.onButton)
+            
+            if 'delete' in name:    
+                ctrl.Disable()
+                
+            if not 'button' in name:
+                #boxSizer.Add(ctrl, 0)        
+                editSizer.Add(boxSizer, 0)
+            else:
+                editSizer.Add(ctrl, 0)
+        
+        MainSizer.Add(listctrl, 0)
+        MainSizer.Add(editSizer,0)
+        MainSizer.Add(text, 0)
+        
+        self.SetSizer(MainSizer)
+        self.Layout()
+    
+        wx.CallAfter(self.onLoad, event='')
+   
+   
+    def onLoad(self, event):
+        lc_name = 'invMaint_priceSchemes_listctrl'
+        listctrl = wx.FindWindowByName(lc_name)
+        query = 'SELECT scheme_list,reduce_by,name FROM item_pricing_schemes'
+        data = ''
+        returnd = SQConnect(query, data).ALL()
+        
+        idx = 0
+        for scheme_list, reduceby, named in returnd:
+            setList = [(0,named),(1,scheme_list),(2,str(reduceby))]
+            ListCtrl_Ops(lc_name).LCFill(setList, idx)
+            
+    
+    def OnSave(self):
+        print("Pricing Schemes")
+        listctrl = wx.FindWindowByName('invMaint_priceSchemes_listctrl')
+        count = listctrl.GetItemCount()
+        for idx in range(count):
+            name_scheme = listctrl.GetItemText(idx)
+            print("Get Item {0} : {1}".format(listctrl.GetItem(idx), name_scheme))     
+            queryWhere = 'name=(?)'
+            queryData = (name_scheme,)
+            countd = QueryOps().QueryCheck('item_pricing_schemes',queryWhere,queryData)
+            print("Countd : ",countd)
+            if countd == 0:
+                name = listctrl.GetItem(idx,0).GetText().strip()
+                schemeList = listctrl.GetItem(idx,1).GetText().strip()
+                reduceby = listctrl.GetItem(idx,2).GetText()
+                print("Name : {0}, Scheme : {1}, ReduceBy : {2}".format(name,schemeList,reduceby))
+                query = 'INSERT INTO item_pricing_schemes (name,scheme_list,reduce_by) VALUES ((?),(?),(?))'
+                data = (name,schemeList,reduceby,)
+                returnd = SQConnect(query, data).ONE()
+               
+           
+    def onItemSelect(self, event):
+        delete = wx.FindWindowByName('invMaint_priceSchemes_listctrl_delete_button').Enable()        
+                
+        
+    def onButton(self, event):
+        obj = event.GetEventObject()
+        named = obj.GetName()
+        debug=False
+        
+        active_list = [('Name','invMaint_priceSchemes_listctrl_name_txtctrl'),
+                       ('Schemed','invMaint_priceSchemes_listctrl_scheme_txtctrl'),
+                       ('Reduce By','invMaint_priceSchemes_listctrl_reduceby_numctrl')]
+        
+        print("Button : ",named)
+        if 'add' in named:
+            listctrl = wx.FindWindowByName('invMaint_priceSchemes_listctrl')
+            line = listctrl.GetItemCount()
+           
+                    
+            for label, name in active_list:
+                print("Name : ",name)
+                ctrl = wx.FindWindowByName(name)
+                value = ctrl.GetValue()
+                if not value:
+                    ctrl.SetBackgroundColour('RED')     
+                    return
+                
+                print("LIST CTRL : ",listctrl.GetName())
+                if '_name_' in name:
+                    listctrl.InsertItem(line,value)
+                    print("Set {0} : {1} on Line {2}".format('Name', value, line))
+                
+                if '_scheme_' in name:
+                    listctrl.SetItem(line , 1, str(value))
+                    print("Set {0} : {1} on Line {2}".format('Scheme', value, line))
+               
+                if '_reduceby_' in name:
+                    listctrl.SetItem(line, 2, str(value))
+                    print("Set {0} : {1} on Line {2}".format('Reduce By', value, line))
+                
+        if 'clear' in named:
+            for label, name in active_list:
+                print("Clear Name : ",name)
+                wx.FindWindowByName(name).ClearCtrl()
+        
+        if 'delete' in named:
+            lc_name = 'invMaint_priceSchemes_listctrl'
+            print("Listctrl Name : ",lc_name)
+            listctrl = wx.FindWindowByName(lc_name)
+            line = listctrl.GetFirstSelected()
+            print("item : ",listctrl)
+            
+            named = listctrl.GetItemText(line)
+            print("Named : ",named)
+            
+            query = 'DELETE FROM item_pricing_schemes WHERE name=(?)'
+            data = (named,)
+            returnd = SQConnect(query, data).ONE()
+            
+            listctrl.DeleteItem(line)   
 
 
 class InventoryMaintenanceTab(wx.Panel):
@@ -603,38 +784,32 @@ class GeneralInfoTab(wx.Panel):
             
         
     def onSave(self, event):
-        listd = self.LSL.To_Dict()
-        q,d, sqlfile = self.LSL.UpdateQD(listd['basic_store_info']['selects'], 'store_num')
-        r = SQConnect(q, d, sqlfile).ONE()
-
-
-
-        # sqlfile = self.storenum_tc.sqlfile
-        # storenumd = self.storenum_tc.GetCtrl()
-        # named = self.storename_tc.GetCtrl()
-        # addr1 = self.address1_tc.GetCtrl()
-        # addr2 = self.address2_tc.GetCtrl()
-        # cityd = self.city_tc.GetCtrl()
-        # stated = self.state_tc.GetCtrl()
-        # zipd = self.zipcode_tc.GetCtrl()
-        # phon1d = self.phone1_tc.GetCtrl()
-        # phon2d = self.phone2_tc.GetCtrl()
-        # faxd = self.fax_tc.GetCtrl()
-        # emaild = self.email_tc.GetCtrl()
-        # sited = self.website_tc.GetCtrl()
-        # logod = self.filepicker_c.GetCtrl()
+        # listd = self.LSL.To_Dict()
+        # q,d, sqlfile = self.LSL.UpdateQD(listd['basic_store_info']['selects'], 'store_num')
+        # pout.v(q, d, sqlfile)
+        # r = SQConnect(q, d, sqlfile).ONE()
+        
+        sqlfile = self.storenum_tc.sqlfile
+        storenumd = self.storenum_tc.GetCtrl()
+        named = self.storename_tc.GetCtrl()
+        addr1 = self.address1_tc.GetCtrl()
+        addr2 = self.address2_tc.GetCtrl()
+        cityd = self.city_tc.GetCtrl()
+        stated = self.state_tc.GetCtrl()
+        zipd = self.zipcode_tc.GetCtrl()
+        phon1d = self.phone1_tc.GetCtrl()
+        phon2d = self.phone2_tc.GetCtrl()
+        faxd = self.fax_tc.GetCtrl()
+        emaild = self.email_tc.GetCtrl()
+        sited = self.website_tc.GetCtrl()
+        logod = self.filepicker_c.GetCtrl()
 
         q = '''UPDATE basic_store_info 
-               SET name=?
+               SET name=?, address1=?, address2=?, city=?, state=?, zip=?, phone1=?, phone2=?, fax=?, email=?, website=?, logo=?
                WHERE store_num=?'''
-        # address1=?, address2=?, city=?, state=?, zipcode=?, phone1=?, phone2=?, fax=?, email=?, website=?, logo=?
-        pout.v(q)
-        # addr1, addr2, cityd, stated, zipd, phon1d, phon2d, faxd, emaild, sited, logod,
-        d = [named, storenumd,]
-        pout.v(d)
+        d = (named, addr1, addr2, cityd, stated, zipd, phon1d, phon2d, faxd, emaild, sited, logod, storenumd,)
         r = SQConnect(q, d, sqlfile).ONE()
-        pout.v(r)
-
+        
 
     
 class StartPanel(wx.Panel):

@@ -5,7 +5,22 @@ import sqlite3
 import time
 from pathlib import Path
 
+class Detupler(object):
+    def __init__(self, obj):
+        self.obj = obj
 
+    def ListIt(self):
+        listd = []
+        for i in self.obj:
+            listd.append(i[0])
+        
+        return listd
+    
+    def TupleIt(self):
+        a = self.ListIt()
+        return tuple(a)
+
+    
 class DBConnect(object):
     def __init__(self, query, data=None, sql_file=None):
         self.query = query
@@ -26,7 +41,7 @@ class DBConnect(object):
             self.cur.execute(self.query)
     
     def END(self):
-        if re.search('(UPDATE|INSERT)', self.query, re.I):
+        if re.search('(UPDATE|INSERT|DELETE)', self.query, re.I):
             self.con.commit()
     
         self.con.close()
@@ -70,8 +85,8 @@ class SQConnect(object):
 
         self.debug = debug
         checkTypes = []
-        if query is not None:
-            query = query.replace("?","%s")
+        # if query is not None:
+        #     query = query.replace("?","%s")
         
         checkTypes = [('query', self.query),
                       ('data', self.data)]    
@@ -124,7 +139,7 @@ class SQConnect(object):
     
         returnd = cur.fetchone()
         pout.v(returnd)
-        print(returnd[0])
+        #print(returnd[0])
         pout.b('--')
         # if self.dbtype == 'sqlite3':
         #     returnd = [{k: item[k] for k in item.keys()} for item in returnd]
