@@ -1,5 +1,6 @@
 import re
 import wx
+from decimal import Decimal
 import pout
 
 class EventOps(object):
@@ -41,9 +42,10 @@ class EventOps(object):
             """
             check for numeric entry accepted result is in self.value
             """
-            
             valued = event.GetEventObject()
             raw_value = valued.GetValue().strip()
+            print(f'raw_value : {raw_value} ')
+            
             if raw_value == '' or raw_value == None:
                 raw_value = '0'
             named = valued.GetName()

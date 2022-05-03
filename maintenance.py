@@ -11,7 +11,7 @@ import wx.lib.masked as masked
 from wx.lib.masked.textctrl import TextCtrl as MTextCtrl
 from wx.lib.masked import NumCtrl
 import wx.lib.agw.flatnotebook as fnb
-from controls import RH_OLV, RH_Button, RH_ListBox, GridOps, Themes, RH_Icon, LoadSaveList, IconList, RH_CheckBox, RH_TextCtrl, RH_FilePickerCtrl, RH_MTextCtrl, RH_RadioBox
+from controls import RH_OLV, RH_Button, RH_ListBox, GridOps, Themes, RH_Icon, LoadSaveList, IconList, RH_CheckBox, RH_TextCtrl, RH_FilePickerCtrl, RH_MTextCtrl, RH_RadioBox, RH_ComboBox, RH_NumCtrl
 from controls import tSizer, LoadSaveDict
 from dialogs import PasswordDialog
 from events import EventOps
@@ -236,7 +236,13 @@ class GeneralMarginTab(wx.Panel):
         """MarginGeneral Details Tab for the Inventory"""
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.SetName('MaintInvPricingMarginTab_GeneralMarginTab')
+        MainSizer = wx.BoxSizer(wx.VERTICAL)
 
+        self.genmargin = RH_NumCtrl(self, -1, size=(50,-1), min=0, max=100, allowNegative=False)
+        tS = tSizer(self, 'General Margin', self.genmargin)
+        MainSizer.Add(tS, 0)
+        self.SetSizer(MainSizer)
+        self.Layout()
 
 class MarginTab(wx.Panel):
     def __init__(self, parent, debug=False):
@@ -293,97 +299,120 @@ class PriceOptionsTab(wx.Panel):
         """Pricing Options Tab for the Inventory"""
         wx.Panel.__init__(self,parent=parent, id=wx.ID_ANY)
         self.SetName('Maintenance_PriceOptionsTab')
-        MainSizer = wx.BoxSizer(wx.HORIZONTAL)
-        
-        listboxes = [('Price Schemes','invMaint_priceSchemes_listbox')]
-        colLabel_list = [('Name',120),('Scheme',90),('Reduce By',75)]
-        self.priceSchemes_lc = RH_OLV(self,size=(300,260), name='invMaint_priceSchemes_listctrl', style=wx.LC_REPORT|wx.BORDER_SIMPLE)      
-        self.priceSchemes_lc.SetColumns([
-                            ColumnDefn('Name','left',120,'named'),
-                            ColumnDefn('Scheme','center',90,'schemed'),
-                            ColumnDefn('Reduce By','center',75,'reduced')
-                            ])
+        MainSizer = wx.BoxSizer(wx.VERTICAL)
+        self.tba = wx.StaticText(self, -1, 'TO BE ADDED')
 
-        self.priceSchemes_lc.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onItemSelect)
-        idx = 0
-        
-        explanation = 'Enter a Scheme i.e. \'1-3-10\' According to Starting Margin & Reduced_By will \nset each additional unit qty less by reduced_by percentage separated by \'-\' dashes\n Also \'1-PK-2X\' will result in \'1 & box qty & box qty * 2\''              
-        text = wx.StaticText(self, -1, label=explanation)
-        
-        editSizer = wx.BoxSizer(wx.HORIZONTAL)
-        edit_list = [('Name','invMaint_priceSchemes_listctrl_name_txtctrl'),
-                     #('Schemed','invMaint_priceSchemes_listctrl_scheme_txtctrl'),
-                     #('Reduce By','invMaint_priceSchemes_listctrl_reduceby_numctrl'),
-                     ('Qty','invMaint_priceSchemes_qty1_txtctrl'),
-                     ('Operator','invMaint_priceSchemes_opt1_combobox'),
-                     ('Margin', 'invMaint_priceSchemes_margin1_txtctrl'),
-                     ('Qty','invMaint_priceSchemes_qty2_txtctrl'),
-                     ('Operator','invMaint_priceSchemes_opt2_combobox'),
-                     ('Margin', 'invMaint_priceSchemes_margin2_txtctrl'),
-                     ('Qty','invMaint_priceSchemes_qty3_txtctrl'),
-                     ('Operator','invMaint_priceSchemes_opt3_combobox'),
-                     ('Margin', 'invMaint_priceSchemes_margin3_txtctrl'),
-                     ('Qty','invMaint_priceSchemes_qty4_txtctrl'),
-                     ('Operator','invMaint_priceSchemes_opt4_combobox'),
-                     ('Margin', 'invMaint_priceSchemes_margin4_txtctrl'),
-                     ('Add','invMaint_priceSchemes_listctrl_add_button'),
-                     ('Delete','invMaint_priceSchemes_listctrl_delete_button'),
-                     ('Clear','invMaint_priceSchemes_listctrl_clear_button')]
+        MainSizer.Add(self.tba, 0)
+        # listboxes = [('Price Schemes','invMaint_priceSchemes_listbox')]
+        # colLabel_list = [('Name',120),('Scheme',90),('Reduce By',75)]
+        # self.priceSchemes_lc = RH_OLV(self,size=(300,260), name='invMaint_priceSchemes_listctrl', style=wx.LC_REPORT|wx.BORDER_SIMPLE)      
+        # self.priceSchemes_lc.SetColumns([
+        #                     ColumnDefn('Name','left',120,'named'),
+        #                     ColumnDefn('Scheme','center',90,'schemed'),
+        #                     ColumnDefn('Reduce By','center',75,'reduced')
+        #                     ])
 
-        name = 'invMaint_priceSchemes_listctrl_name_texctrl'
-        self.name_tc = RH_TextCtrl(self, -1, name=name)             
-        self.name_tc.SetToolTip(wx.ToolTip('Enter a Percentage of Margin you wish to Reduce the initial margin by'))
-        self.name_tc.Bind(wx.EVT_KILL_FOCUS, EventOps().Capitals)
-        editSizer.Add(self.name_tc, 0)
-
-        name = 'invMaint_priceSchemes_qty1_textctrl'
-        self.qty1_tc = RH_TextCtrl(self, -1, name=name)
-        editSizer.Add(self.qty1_tc, 0)
-
-        name = 'invMaint_priceSchemes_opt1_combobox'
-        self.opt1_cbox = RH_ComboBox(self, -1, choices=[], name=name)
-        editSizer.Add(self.opt1_cbox)
+        # self.priceSchemes_lc.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onItemSelect)
+        # idx = 0
         
-        name = 'invMaint_priceSchemes_margin1_textctrl'
-        icon = IconList()
-        for label, name in edit_list:
-            box = wx.StaticBox(self, label=label)
-            boxSizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
-            if '_reduceby_' in name:
-                ctrl = RH_TextCtrl(self, -1, name=name)
-                ctrl.SetToolTip(wx.ToolTip('Enter a Percentage of Margin you wish to Reduce the initial margin by'))
+        # explanation = 'Enter a Scheme i.e. \'1-3-10\' According to Starting Margin & Reduced_By will \nset each additional unit qty less by reduced_by percentage separated by \'-\' dashes\n Also \'1-PK-2X\' will result in \'1 & box qty & box qty * 2\''              
+        # text = wx.StaticText(self, -1, label=explanation)
+        
+        # editSizer = wx.BoxSizer(wx.HORIZONTAL)
+        # edit_list = [('Name','invMaint_priceSchemes_listctrl_name_txtctrl'),
+        #              #('Schemed','invMaint_priceSchemes_listctrl_scheme_txtctrl'),
+        #              #('Reduce By','invMaint_priceSchemes_listctrl_reduceby_numctrl'),
+        #             #  ('Qty','invMaint_priceSchemes_qty1_txtctrl'),
+        #             #  ('Operator','invMaint_priceSchemes_opt1_combobox'),
+        #             #  ('Margin', 'invMaint_priceSchemes_margin1_txtctrl'),
+        #              ('Qty','invMaint_priceSchemes_qty2_txtctrl'),
+        #              ('Operator','invMaint_priceSchemes_opt2_combobox'),
+        #              ('Margin', 'invMaint_priceSchemes_margin2_txtctrl'),
+        #              ('Qty','invMaint_priceSchemes_qty3_txtctrl'),
+        #              ('Operator','invMaint_priceSchemes_opt3_combobox'),
+        #              ('Margin', 'invMaint_priceSchemes_margin3_txtctrl'),
+        #              ('Qty','invMaint_priceSchemes_qty4_txtctrl'),
+        #              ('Operator','invMaint_priceSchemes_opt4_combobox'),
+        #              ('Margin', 'invMaint_priceSchemes_margin4_txtctrl'),
+        #              ('Add','invMaint_priceSchemes_listctrl_add_button'),
+        #              ('Delete','invMaint_priceSchemes_listctrl_delete_button'),
+        #              ('Clear','invMaint_priceSchemes_listctrl_clear_button')]
+
+        # name = 'invMaint_priceSchemes_listctrl_name_texctrl'
+        # self.name_tc = RH_TextCtrl(self, -1, name=name)             
+        # self.name_tc.SetToolTip(wx.ToolTip('Enter a Percentage of Margin you wish to Reduce the initial margin by'))
+        # self.name_tc.Bind(wx.EVT_KILL_FOCUS, EventOps().Capitals)
+        # tS = tSizer(self, 'Scheme Name', self.name_tc)
+        # editSizer.Add(tS, 0)
+
+        # name = 'invMaint_priceSchemes_qty1_textctrl'
+        # self.qty1_tc = RH_TextCtrl(self, -1, name=name)
+        # tS = tSizer(self, 'Qty', self.qty1_tc)
+        # editSizer.Add(tS, 0)
+
+        # name = 'invMaint_priceSchemes_opt1_combobox'
+        # self.opt1_cbox = RH_ComboBox(self, -1, choices=[], name=name)
+        # tS = tSizer(self, 'Operator', self.opt1_cbox)
+        # editSizer.Add(tS, 0)
+        
+        # name = 'invMaint_priceSchemes_margin1_textctrl'
+        # self.margin1_tc = RH_TextCtrl(self, -1, name=name)
+        # tS = tSizer(self, 'Margin', self.margin1_tc)
+        # editSizer.Add(tS, 0)
+
+        # # name = 'invMaint_priceSchemes_qty2_textctrl'
+        # # self.qty1_tc = RH_TextCtrl(self, -1, name=name)
+        # # editSizer.Add(self.qty1_tc, 0)
+
+        # # name = 'invMaint_priceSchemes_opt2_combobox'
+        # # self.opt1_cbox = RH_ComboBox(self, -1, choices=[], name=name)
+        # # editSizer.Add(self.opt1_cbox)
+        
+        # # name = 'invMaint_priceSchemes_margin2_textctrl'
+        # # self.margin1_tc = RH_TextCtrl(self, -1, name=name)
+        # # editSizer.Add(self.margin1_tc)
+
+
+
+        # # icon = IconList()
+        # # for label, name in edit_list:
+        # #     box = wx.StaticBox(self, label=label)
+        # #     boxSizer = wx.StaticBoxSizer(box, wx.HORIZONTAL)
+        # #     if '_reduceby_' in name:
+        # #         ctrl = RH_TextCtrl(self, -1, name=name)
+        # #         ctrl.SetToolTip(wx.ToolTip('Enter a Percentage of Margin you wish to Reduce the initial margin by'))
                 
-            if '_name_' in name:
-                ctrl = RH_MTextCtrl(self, -1, name=name, mask='XXXXXXXXX')
-                ctrl.SetToolTip(wx.ToolTip('Enter a Name for the Scheme within 9 characters'))
-                ctrl.Bind(wx.EVT_KILL_FOCUS, EventOps().Capitals)
+        # #     if '_name_' in name:
+        # #         ctrl = RH_MTextCtrl(self, -1, name=name, mask='XXXXXXXXX')
+        # #         ctrl.SetToolTip(wx.ToolTip('Enter a Name for the Scheme within 9 characters'))
+        # #         ctrl.Bind(wx.EVT_KILL_FOCUS, EventOps().Capitals)
                 
-            if '_scheme_' in name:
-                ctrl = RH_TextCtrl(self, -1, name=name)
-                ctrl.Bind(wx.EVT_KILL_FOCUS, EventOps().Capitals)
-                #ctrl.SetToolTip(wx.ToolTip('Enter a Scheme i.e. \'1-3-10\' According to Starting Margin & Reduced_By will \nset each additional unit qty less by reduced_by percentage separated by \'-\' dashes\n Also \'1-PK-2X\' will result in \'1 & box qty & box qty * 2\''))     
+        # #     if '_scheme_' in name:
+        # #         ctrl = RH_TextCtrl(self, -1, name=name)
+        # #         ctrl.Bind(wx.EVT_KILL_FOCUS, EventOps().Capitals)
+        # #         #ctrl.SetToolTip(wx.ToolTip('Enter a Scheme i.e. \'1-3-10\' According to Starting Margin & Reduced_By will \nset each additional unit qty less by reduced_by percentage separated by \'-\' dashes\n Also \'1-PK-2X\' will result in \'1 & box qty & box qty * 2\''))     
             
-            if 'button' in name:
-                save = icon.getIcon(label.lower())
-                self.si = wx.Button(self, -1, label=save, style=wx.BORDER_NONE)
-                self.si.SetFont(icon.getFont(size=60))
-                self.si.Bind(wx.EVT_BUTTON, self.onButton)
+        # #     if 'button' in name:
+        # #         save = icon.getIcon(label.lower())
+        # #         self.si = wx.Button(self, -1, label=save, style=wx.BORDER_NONE)
+        # #         self.si.SetFont(icon.getFont(size=60))
+        # #         self.si.Bind(wx.EVT_BUTTON, self.onButton)
         
-                # ctrl = RH_Button(self, label=label, name=name, size=(20))
-                # ctrl.Bind(wx.EVT_BUTTON, self.onButton)
+        # #         # ctrl = RH_Button(self, label=label, name=name, size=(20))
+        # #         # ctrl.Bind(wx.EVT_BUTTON, self.onButton)
             
-            if 'delete' in name:    
-                ctrl.Disable()
+        # #     if 'delete' in name:    
+        # #         ctrl.Disable()
                 
-            if not 'button' in name:
-                #boxSizer.Add(ctrl, 0)        
-                editSizer.Add(boxSizer, 0)
-            else:
-                editSizer.Add(ctrl, 0)
+        # #     if not 'button' in name:
+        # #         #boxSizer.Add(ctrl, 0)        
+        # #         editSizer.Add(boxSizer, 0)
+        # #     else:
+        # #         editSizer.Add(ctrl, 0)
         
-        MainSizer.Add(listctrl, 0)
-        MainSizer.Add(editSizer,0)
-        MainSizer.Add(text, 0)
+        # MainSizer.Add(self.priceSchemes_lc, 0)
+        # MainSizer.Add(editSizer,0)
+        # MainSizer.Add(text, 0)
         
         self.SetSizer(MainSizer)
         self.Layout()
