@@ -18,7 +18,7 @@ from events import EventOps
 from decimal import Decimal, ROUND_HALF_UP
 import wx.lib.inspection
 from db_ops import SQConnect, QueryOps, LookupDB, GetSQLFile, DBConnect, Detupler
-from panels import AltLookup, Tax_Table_Grid
+from panels import AltLookup, Tax_Table_Grid, TBA
 from utils import IconPanel
 
 
@@ -65,7 +65,9 @@ class TaxInfoTab(wx.Panel):
         """ Tax Info Tab """    
         wx.Panel.__init__(self,parent=parent, id=wx.ID_ANY)
         self.SetName('Maintenance_TaxInfoTab')
-   
+        MainSizer = wx.BoxSizer(wx.VERTICAL)
+        
+
     
 class POSTab(wx.Panel):
     def __init__(self, parent, size=(500,500), debug=False):
@@ -287,6 +289,13 @@ class DiscountOptionsTab(wx.Panel):
         """Discount Options Tab for the Pricing Sections of the Inventory"""
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY)
         self.SetName('MaintInvPricingTab_DiscOptionsTab')
+        MainSizer = wx.BoxSizer(wx.VERTICAL)
+        
+        self.tba = wx.StaticText(self, -1, f'{self.thing.upper()} TO BE ADDED')
+        
+        MainSizer.Add(self.tba, 0)
+        self.SetSizer(MainSizer)
+        self.Layout()
 
 class CloseoutsTab(wx.Panel):
     def __init__(self, parent, debug=False):
@@ -301,8 +310,8 @@ class PriceOptionsTab(wx.Panel):
         self.SetName('Maintenance_PriceOptionsTab')
         MainSizer = wx.BoxSizer(wx.VERTICAL)
         self.tba = wx.StaticText(self, -1, 'TO BE ADDED')
-
         MainSizer.Add(self.tba, 0)
+
         # listboxes = [('Price Schemes','invMaint_priceSchemes_listbox')]
         # colLabel_list = [('Name',120),('Scheme',90),('Reduce By',75)]
         # self.priceSchemes_lc = RH_OLV(self,size=(300,260), name='invMaint_priceSchemes_listctrl', style=wx.LC_REPORT|wx.BORDER_SIMPLE)      
@@ -319,6 +328,7 @@ class PriceOptionsTab(wx.Panel):
         # text = wx.StaticText(self, -1, label=explanation)
         
         # editSizer = wx.BoxSizer(wx.HORIZONTAL)
+        
         # edit_list = [('Name','invMaint_priceSchemes_listctrl_name_txtctrl'),
         #              #('Schemed','invMaint_priceSchemes_listctrl_scheme_txtctrl'),
         #              #('Reduce By','invMaint_priceSchemes_listctrl_reduceby_numctrl'),

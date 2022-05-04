@@ -5,6 +5,19 @@ import pout
 from controls import RH_Button, RH_ListBox, RH_TextCtrl, GridOps, Themes, IconList
 from db_ops import LookupDB
 
+class TBA(wx.Panel):
+    """TO BE ADDED """
+    def __init__(self, *args, **kwargs):
+        self.thing = kwargs.pop('thing')
+        wx.Panel.__init__(self, *args, **kwargs)
+        MainSizer = wx.BoxSizer(wx.VERTICAL)
+
+        self.tba = wx.StaticText(self, -1, f'{self.thing.upper()} TO BE ADDED')
+        MainSizer.Add(self.tba, 0)
+
+        self.SetSizer(MainSizer)
+        self.Layout()
+
 class PhoneNumber_Panel(wx.Panel):
     """PhoneNumber Panel contains all controls necessary to achieve adding phone numbers to accounts. 
        The fieldname & tablename variables are  for the phone olv to save to customer accounts."""
