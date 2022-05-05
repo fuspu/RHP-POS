@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 import wx,re,os 
 import wx.grid as gridlib
 import sys
@@ -66,8 +66,25 @@ class TaxInfoTab(wx.Panel):
         wx.Panel.__init__(self,parent=parent, id=wx.ID_ANY)
         self.SetName('Maintenance_TaxInfoTab')
         MainSizer = wx.BoxSizer(wx.VERTICAL)
-        
+        rclick = 'Right Clicking on a line deletes that Tax Record from db'
+        rcs = wx.StaticText(self, -1, label=rclick)
+        rcs.SetForegroundColour('RED')
+        MainSizer.Add(rcs, 0, wx.ALL|wx.ALIGN_CENTER, 10)
+        icon = IconList()
+        save = icon.getIcon('save')
+        self.si = wx.Button(self, -1, label=save, style=wx.BORDER)
+        self.si.SetFont(icon.getFont(size=60))
+        self.si.Bind(wx.EVT_BUTTON, self.OnSave)
+        MainSizer.Add(self.si, 0, wx.ALL|wx.ALIGN_CENTER, 10)
 
+        self.TaxGrid = Tax_Table_Grid(self, name='taxinfotab_taxinfo_grid', size=(900,500))
+        
+        MainSizer.Add(self.TaxGrid, 0, wx.ALL|wx.ALIGN_CENTER, 10)
+        self.SetSizer(MainSizer,0)
+        self.Layout()
+
+    def OnSave(self, evt):
+        self.TaxGrid.OnSave()
     
 class POSTab(wx.Panel):
     def __init__(self, parent, size=(500,500), debug=False):
@@ -291,7 +308,7 @@ class DiscountOptionsTab(wx.Panel):
         self.SetName('MaintInvPricingTab_DiscOptionsTab')
         MainSizer = wx.BoxSizer(wx.VERTICAL)
         
-        self.tba = wx.StaticText(self, -1, f'{self.thing.upper()} TO BE ADDED')
+        self.tba = wx.StaticText(self, -1, 'Discount Options TO BE ADDED')
         
         MainSizer.Add(self.tba, 0)
         self.SetSizer(MainSizer)

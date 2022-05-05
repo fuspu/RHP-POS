@@ -78,11 +78,12 @@ class SQConnect(object):
         self.query = None
         self.data = None
         self.sql_file = sql_file
-        pout.v(self.sql_file)
         if sql_file is None:
             tablename = re.sub('^.+FROM.([a-zA-Z]+)', '\\1', query)
             self.sql_file = GetSQLFile(tablename).Get()
 
+        pout.v(self.sql_file)
+        
         self.debug = debug
         checkTypes = []
         # if query is not None:
@@ -523,7 +524,7 @@ class LookupDB(object):
     def __init__(self, table, sql_file=None, dbtype='sqlite3', debug=False):
         self.table = table
         self.dbtype = dbtype
-        self.sql_file = self.GetSQLFile(sql_file)
+        self.sql_file = self.GetSQLFile(self.table)
         
     def GetSQLFile(self, sql_file):
         supportSQLFile = './db/SUPPORT.sql'

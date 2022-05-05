@@ -1107,7 +1107,10 @@ class Themes(object):
         note_color = '#f8fda9'
         info_color = '#e8f4f0'
         returnd = None
-        returnd = LookupDB('themes').Specific(self.tname, 'theme_name', color_for)
+        try:
+            returnd = LookupDB('themes').Specific(self.tname, 'theme_name', color_for)
+        except:
+            print()
         print(f'GetColor {self.tname} : Returnd : {returnd}')
         return returnd
         # (bg, text, cell) = returnd

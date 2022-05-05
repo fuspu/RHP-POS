@@ -3,7 +3,7 @@ from ObjectListView import ObjectListView, ColumnDefn, OLVEvent
 import wx.grid as gridlib
 import pout
 from controls import RH_Button, RH_ListBox, RH_TextCtrl, GridOps, Themes, IconList
-from db_ops import LookupDB
+from db_ops import LookupDB, QueryOps
 
 class TBA(wx.Panel):
     """TO BE ADDED """
@@ -196,7 +196,7 @@ class AltLookup(wx.Panel):
 class Tax_Table_Grid(gridlib.Grid):
     """Table Info for Taxes."""
     def __init__(self, parent, name, size):
-        gridlib.Grid.__init__(self, parent, style=wx.BORDER_SUNKEN, name=name, size=size)
+        gridlib.Grid.__init__(self, parent, style=wx.BORDER_RAISED, name=name, size=size)
 
         colLabel_list = [('Tax Name', 250),
                          ('Min\nSale', 70),
@@ -282,7 +282,8 @@ class Tax_Table_Grid(gridlib.Grid):
         for x in range(0, 6):
             tax_name = self.GetCellValue(x, 0)
             if len(tax_name) > 0:
-                QueryOps().CheckEntryExist('tax_name', tax_name, ['tax_tables'])
+                a = QueryOps().CheckEntryExist('tax_name', tax_name, ['tax_tables'])
+                pout.v(a)
                 neList = [(1, 'min_sale'),
                         (2, 'max_sale'),
                         (3, 'item_max'),
@@ -294,6 +295,7 @@ class Tax_Table_Grid(gridlib.Grid):
                         (9, 'tax_rate2')]
                 for y, field, in neList:
                     val = self.GetCellValue(x, y)
+                    pout.v(field, val, 'tax_name', tax_name)
                     returnd = LookupDB('tax_tables').UpdateSingle(field, val, 'tax_name', tax_name)
 
     def Update(self, tax_dict):
