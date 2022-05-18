@@ -3,7 +3,7 @@ from ObjectListView import ObjectListView, ColumnDefn, OLVEvent
 import wx.grid as gridlib
 import pout
 from controls import RH_Button, RH_ListBox, RH_TextCtrl, GridOps, Themes, IconList
-from db_ops import LookupDB, QueryOps
+from db_ops import LookupDB, QueryOps, SQConnect
 
 class TBA(wx.Panel):
     """TO BE ADDED """
@@ -282,21 +282,40 @@ class Tax_Table_Grid(gridlib.Grid):
         for x in range(0, 6):
             tax_name = self.GetCellValue(x, 0)
             if len(tax_name) > 0:
-                a = QueryOps().CheckEntryExist('tax_name', tax_name, ['tax_tables'])
-                pout.v(a)
-                neList = [(1, 'min_sale'),
-                        (2, 'max_sale'),
-                        (3, 'item_max'),
-                        (4, 'from_amt0'),
-                        (5, 'tax_rate0'),
-                        (6, 'from_amt1'),
-                        (7, 'tax_rate1'),
-                        (8, 'from_amt2'),
-                        (9, 'tax_rate2')]
-                for y, field, in neList:
-                    val = self.GetCellValue(x, y)
-                    pout.v(field, val, 'tax_name', tax_name)
-                    returnd = LookupDB('tax_tables').UpdateSingle(field, val, 'tax_name', tax_name)
+                q = f"SELECT tax_name FROM 'tax_tables' WHERE tax_name=?"
+                d = (tax_name,)
+                r = SQConnect(q,d).ONE()
+                if r[0] is None: 
+                    #a = QueryOps().CheckEntryExist('tax_name', tax_name, ['tax_tables'])
+                    #pout.v(a)
+                    neList = (
+                              (1, 'min_sale'),
+                              (2, 'max_sale'),
+                              (3, 'item_max'),
+                              (4, 'from_amt0'),
+                              (5, 'tax_rate0'),
+                              (6, 'from_amt1'),
+                              (7, 'tax_rate1'),
+                              (8, 'from_amt2'),
+                              (9, 'tax_rate2')
+                            )
+
+                    q = "INSERT INTO tax_tables (tax_name) VALUES (?)"
+                    d = (tax_name,)
+                    r = SQConnect(q, d).ONE()
+                    field_into = ""
+                    val_into = ""
+                    for y, field, in neList:
+                        val = self.GetCellValue(x, y)
+                        field_into += f'{field}, '
+                        val_into += f'{val}, '
+
+                    fields = f"tax_name, {field_into.strip(',')}"
+                    vals = f"{tax_name}, {val_info.strip(',')}"
+
+                    q = "INSERT INTO tax_tables ({fields}) VALUES (vals)"    
+                    d = ()
+                    r = SQConnect(q, d, './db/CONFIG.sql').ONE()
 
     def Update(self, tax_dict):
         idx = 0
