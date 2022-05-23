@@ -1145,4 +1145,38 @@ class Themes(object):
         return tname            
 
 
+class ListCtrl_Ops(object):
+    def __init__(self, lcname, debug=False):
+        self.lcname = lcname
+        self.lc = wx.FindWindowByName(self.lcname)
+        
+
+    def LCSetHeaders(self, setList):
+        
+        for idx, label, width, opts in setList:
+            if 'right' in opts.lower():
+                self.lc.InsertColumn(idx, label, format=wx.LIST_FORMAT_RIGHT, width=width)    
+            else:
+                self.lc.InsertColumn(idx, label, width=width)
+
+    def LCAlternateColor(self, result_length,module_name='POS'):
+        cell = Themes(self.lcname).GetColor('cell')
+        idx = 0
+        for idx in range(result_length):
+            if idx % 2:
+                self.lc.SetItemBackgroundColour(idx,cell)
+            
+
+    def LCFill(self, setList,idx):
+        for xx, vari in setList:
+            
+            if xx == 0:
+                self.lc.InsertItem(idx, str(vari))
+            if xx > 0:
+                self.lc.SetItem(idx, xx, str(vari))
+
+    # def LCGet(self, idx=None):
+    #     for 
+
+
 

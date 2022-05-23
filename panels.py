@@ -224,7 +224,7 @@ class Tax_Table_Grid(gridlib.Grid):
             self.SetColSize(idx, sized)
             idx += 1
         
-        self.Default()
+        self.OnLoad()
         self.Bind(wx.grid.EVT_GRID_CELL_RIGHT_CLICK, self.OnRightClick)     
 
         
@@ -257,66 +257,71 @@ class Tax_Table_Grid(gridlib.Grid):
                             from_amt0, tax_rate0, from_amt1, tax_rate1, 
                             from_amt2, tax_rate2'''
                 returnd = LookupDB('tax_tables').General(fields)
-        if returnd is not None:
-            cnt = len(returnd)
-            for i in range(0,cnt):
-                vals = returnd[i]
-                for y in range(0,9):
-                    value = vals[y]
-                    a = re.search('[A-Za-z]', str(value))
-                    aty = str(type(a))
-                    vty = str(type(value))
-                    if not a:
-                        if y in [1, 2, 4, 6, 8]:
-                            value = format(value, '.2f')
-                        elif y in [3]:
-                            value = format(value, '.0f')
-                        
-                        elif 'decimal' in vty:
-                            value = format(value, '.3f')
-                
-                    self.SetCellValue(i, y, str(value))
-                        
+            if returnd is not None:
+                cnt = len(returnd)
+                for i in range(0,cnt):
+                    vals = returnd[i]
+                    for y in range(0,9):
+                        value = vals[y]
+                        a = re.search('[A-Za-z]', str(value))
+                        aty = str(type(a))
+                        vty = str(type(value))
+                        if not a:
+                            if y in [1, 2, 4, 6, 8]:
+                                value = format(value, '.2f')
+                            elif y in [3]:
+                                value = format(value, '.0f')
+                            
+                            elif 'decimal' in vty:
+                                value = format(value, '.3f')
+                    
+                        self.SetCellValue(i, y, str(value))
+        else:
+            self.Default()                    
     
     def OnSave(self):
         for x in range(0, 6):
             tax_name = self.GetCellValue(x, 0)
             if len(tax_name) > 0:
-                q = f"SELECT tax_name FROM 'tax_tables' WHERE tax_name=?"
+                q = f"SELECT tax_name FROM tax_tables WHERE tax_name=?"
                 d = (tax_name,)
                 r = SQConnect(q,d).ONE()
-                if r[0] is None: 
+                pout.v(r)
+                if r is None: 
                     #a = QueryOps().CheckEntryExist('tax_name', tax_name, ['tax_tables'])
                     #pout.v(a)
-                    neList = (
-                              (1, 'min_sale'),
-                              (2, 'max_sale'),
-                              (3, 'item_max'),
-                              (4, 'from_amt0'),
-                              (5, 'tax_rate0'),
-                              (6, 'from_amt1'),
-                              (7, 'tax_rate1'),
-                              (8, 'from_amt2'),
-                              (9, 'tax_rate2')
-                            )
-
                     q = "INSERT INTO tax_tables (tax_name) VALUES (?)"
                     d = (tax_name,)
                     r = SQConnect(q, d).ONE()
-                    field_into = ""
-                    val_into = ""
-                    for y, field, in neList:
-                        val = self.GetCellValue(x, y)
-                        field_into += f'{field}, '
-                        val_into += f'{val}, '
+                else:
+                    print('Tax Name Found')
 
-                    fields = f"tax_name, {field_into.strip(',')}"
-                    vals = f"{tax_name}, {val_info.strip(',')}"
+                neList = (
+                    (1, 'min_sale'),
+                    (2, 'max_sale'),
+                    (3, 'item_max'),
+                    (4, 'from_amt0'),
+                    (5, 'tax_rate0'),
+                    (6, 'from_amt1'),
+                    (7, 'tax_rate1'),
+                    (8, 'from_amt2'),
+                    (9, 'tax_rate2')
+                )
+                
+                field_into = ""
+                val_into = ""
+                for y, field, in neList:
+                    val = self.GetCellValue(x, y)
+                    field_into += f'{field}={val}, '
+                    
+                setfields = field_into.strip(', ')
+                
 
-                    q = "INSERT INTO tax_tables ({fields}) VALUES (vals)"    
-                    d = ()
-                    r = SQConnect(q, d, './db/CONFIG.sql').ONE()
-
+                q = f"UPDATE tax_tables SET {setfields} WHERE tax_name=? "    
+                d = (tax_name,)
+                pout.v(q)
+                r = SQConnect(q, d, './db/CONFIG.sql').ONE()
+                
     def Update(self, tax_dict):
         idx = 0
         self.ClearGrid()

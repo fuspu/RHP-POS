@@ -75,11 +75,11 @@ class GetSQLFile(object):
 class SQConnect(object):
     def __init__(self, query, data=None, sql_file=None, dbtype='sqlite3', debug=False):
         self.dbtype = dbtype
-        self.query = None
-        self.data = None
+        self.query = query
+        self.data = data
         self.sql_file = sql_file
-        if sql_file is None:
-            tablename = re.sub('^.+FROM.([a-zA-Z]+)', '\\1', query)
+        if self.sql_file is None:
+            tablename = self.GetTableName(self.query)   # re.sub('^.+FROM.([a-zA-Z]+)', '\\1', query)
             self.sql_file = GetSQLFile(tablename).Get()
 
         pout.v(self.sql_file)
@@ -96,6 +96,18 @@ class SQConnect(object):
         self.data = self.MaskData(query,data)
         returnd = None
     
+    def GetTableName(self, q):
+        a = q.lower().split()
+        chk = ['from', 'into']
+        for term in chk:
+            if term in a:
+                fromidx = a.index(term)
+                tableName = a.pop(fromidx+1)
+                break
+
+        return tableName
+
+
     def ALL(self):
         if self.dbtype == 'mysql':
             con = pymysql.connect(host='localhost', user='rhp', passwd='password', db='rhp')

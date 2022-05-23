@@ -444,14 +444,15 @@ class PriceOptionsTab(wx.Panel):
         self.SetSizer(MainSizer)
         self.Layout()
     
-        wx.CallAfter(self.onLoad, event='')
+        #wx.CallAfter(self.onLoad, event='')
    
    
     def onLoad(self, event):
         lc_name = 'invMaint_priceSchemes_listctrl'
         listctrl = wx.FindWindowByName(lc_name)
-        query = 'SELECT scheme_list,reduce_by,name FROM item_pricing_schemes'
+        query = 'SELECT scheme_list, reduce_by, name FROM item_pricing_schemes'
         data = ''
+        pout.v(query)
         returnd = SQConnect(query, data).ALL()
         
         idx = 0
